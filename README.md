@@ -33,6 +33,10 @@ The application features a startup sequence (vendor logo, optional sound confirm
 
 ---
 
+
+[ Download Zip ](https://github.com/shifat100/Ebook-Crafter-KaiOS/releases/download/Ebook-Crafter-KaiOS/Ebook-Crafter-KaiOS.zip)
+
+
 ### 2. Core Concepts: How it Works
 
 The app works based on a few key file types:
