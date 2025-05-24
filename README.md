@@ -343,8 +343,8 @@ The UI is typical for KaiOS:
       "description": "An amazing collection of stories and info.",
       "launch_path": "/index.html",
       "icons": {
-        "56": "/img/icon_56.png",  // You'll need to create these icon files
-        "112": "/img/icon_112.png" // Place them in your img/ folder
+        "56": "/img/icon_56.png", 
+        "112": "/img/icon_112.png" 
       },
       "developer": {
         "name": "Your Name",
@@ -353,13 +353,13 @@ The UI is typical for KaiOS:
       "type": "web",
       "fullscreen": "true",
       "permissions": {
-        "audio-channel-content": { // If you use background music
+        "audio-channel-content": { 
           "description" : "Required for background music"
         },
-        "feature-detection": { // Good to have for KaiOS
+        "feature-detection": { 
             "description": "Detecting device features"
         }
-        // If you plan to use MozActivity for other things, add permissions here
+       
       },
       "locales": {
         "en-US": {
