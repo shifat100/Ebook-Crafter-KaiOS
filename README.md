@@ -22,7 +22,7 @@
 
 ### 1. Overview
 
-MNU Navigator is an HTML/JavaScript application designed for KaiOS feature phones. It allows you to create a structured, navigable application using simple text files for menus and content. Think of it as a framework for:
+Ebook-Crafter-KaiOS is an HTML/JavaScript application designed for KaiOS feature phones. It allows you to create a structured, navigable application using simple text files for menus and content. Think of it as a framework for:
 
 *   Simple e-books or story collections
 *   Information guides or FAQs
