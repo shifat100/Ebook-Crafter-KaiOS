@@ -1,0 +1,43 @@
+{
+    "name": "Ebook-Crafter-KaiOS",
+    "short_name": "EbookCrafter",
+    "description": "Ebook-Crafter-KaiOS created by Shifat100 (https://github.com/shifat100/Ebook-Crafter-KaiOS)",
+    "version": "1.0.0",
+    "start_url": "/index.html",
+    "scope": "/",
+    "display": "fullscreen",
+    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
+    "icons": [
+      {
+        "src": "/img/icon.png",
+        "sizes": "56x56",
+        "type": "image/png"
+      },
+      {
+        "src": "/img/icon.png",
+        "sizes": "112x112",
+        "type": "image/png"
+      },
+      {
+        "src": "/img/icon.png",
+        "sizes": "128x128",
+        "type": "image/png"
+      }
+    ],
+    "developer": {
+      "name": "Shifat100"
+    },
+    "dependencies": {
+      "ads-sdk": "1.5.8"
+    },
+    "lang": "en-US",
+    "locales": {
+      "en-US": {
+        "name": "Ebook-Crafter-KaiOS",
+        "subtitle": "An Ebook App for KaiOS",
+        "description": "Ebook-Crafter-KaiOS created by Shifat100 (https://github.com/shifat100/Ebook-Crafter-KaiOS)"
+      }
+    }
+  }

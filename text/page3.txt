@@ -1,0 +1,26 @@
+link's Demo
+
+
+###
+google
+http://google.com/
+###
+###
+facebook
+http://facebook.com/
+###
+
+###
+chatgpt
+http://chatgpt.com/
+###
+
+###
+twitter
+http://x.com/
+###
+
+###
+kaios
+http://kaiostech.com/
+###

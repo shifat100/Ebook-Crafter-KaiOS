@@ -1,0 +1,12 @@
+Ebook-Crafter-KaiOS
+
+Developer: Shifat100
+Version: 1.0.0 
+Platform: KaiOS
+Github Link: https://github.com/shifat100/Ebook-Crafter-KaiOS
+
+
+###
+Shifat100
+http://shifat100.xtgem.com/
+###

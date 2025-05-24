@@ -1,0 +1,7 @@
+Help
+ 
+5: Toogle Scroll
+ 
+Arrow left/ Arrow Right:  long scroll
+ 
+Arrow Up/ Arrow Down: Page UP And Down Contrls Menu

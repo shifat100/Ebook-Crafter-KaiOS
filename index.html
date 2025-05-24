@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>S-Book</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta name="theme_color" content="#000">
+    <link rel="stylesheet" href="style.css">
+    <style id="static-styles">
+        * {
+            box-sizing: border-box;
+            outline: 0px;
+        }
+
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #000;
+            scroll-behavior: smooth;
+        }
+
+        .status-bar {
+            padding: 5px 10px;
+            text-align: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 14px;
+            background: url('img/soft_1.png') no-repeat center/cover;
+            color: white;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            position: relative;
+            width: 100%;
+            word-wrap: break-word;
+            word-break: keep-all;
+            background-color: #000;
+        }
+
+        .main-content::after {
+            content: "";
+        }
+
+        #menu-list,
+        #link-list-ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #menu-list li,
+        #link-list-ul li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #555;
+            cursor: pointer;
+            color: #ccc;
+        }
+
+        #menu-list li.selected,
+        #link-list-ul li.selected {
+            background-color: #fff;
+            color: #000;
+        }
+
+        #content-viewer {
+            padding: 10px;
+            line-height: 1.6;
+            overflow-y: auto;
+            height: 100%;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+            color: #fff;
+            caret-color: #000;
+        }
+
+        #content-viewer p {
+            margin: 0 0 1em 0;
+        }
+
+        #content-viewer img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #777;
+        }
+
+        .softkeys {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            flex-shrink: 0;
+            background: url('img/soft_2.png') no-repeat center/cover;
+        }
+
+        .softkeys div {
+            flex: 1;
+            text-align: center;
+            padding: 5px 0;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+        }
+
+        .softkeys div:nth-child(2) {
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #link-list-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(50, 50, 50, 0.95);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #link-list-overlay .status-bar {}
+
+        #link-list-ul {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #000;
+        }
+
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+
+        #vendor-logo-screen img {
+            max-width: 80%;
+            max-height: 80%;
+        }
+
+        #sound-confirm-screen .sound-confirm-content {
+            padding: 20px;
+        }
+
+        #sound-confirm-screen .sound-confirm-content p {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        #splash-screen {}
+
+        .status-bar,
+        .main-content,
+        .softkeys {
+            visibility: hidden;
+        }
+    </style>
+    <style id="dynamic-styles"></style>
+</head>
+
+<body>
+    <div id="vendor-logo-screen" class="fullscreen-overlay"><img src="img/vendor_logo.png" alt="Vendor Logo"></div>
+    <div id="sound-confirm-screen" class="fullscreen-overlay hidden">
+        <div class="sound-confirm-content">
+            <p>Enable Sound?</p>
+            <table width="100%" style="position: fixed;bottom: 0px; left: 0px; background: #222222;padding: 2px;">
+                <tr><td>Yes</td><td></td><td>No</td></tr>
+            </table>
+        </div>
+    </div>
+    <div id="splash-screen" class="fullscreen-overlay hidden"></div>
+    <div class="status-bar"><span id="status-title">Loading...</span></div>
+    <div class="main-content">
+        <ul id="menu-list"></ul>
+        <div id="content-viewer" class="hidden"></div>
+        <div id="link-list-overlay" class="hidden">
+            <div class="status-bar">Links</div>
+            <ul id="link-list-ul"></ul>
+        </div>
+    </div>
+    <div class="softkeys">
+        <div id="softkey-left"></div>
+        <div id="softkey-center"></div>
+        <div id="softkey-right"></div>
+    </div>
+    <script src="https://static.kaiads.com/ads-sdk/ads-sdk.v5.min.js"></script>
+    <script src="kaiads.v5.min.js"></script>
+    <script src="kaiad_config.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
