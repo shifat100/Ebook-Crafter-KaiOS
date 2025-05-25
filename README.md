@@ -35,6 +35,8 @@ The application features a startup sequence (vendor logo, optional sound confirm
 
 
 ### [ Download Zip ](https://github.com/shifat100/Ebook-Crafter-KaiOS/releases/download/Ebook-Crafter-KaiOS/Ebook-Crafter-KaiOS.zip)
+### [Full Documentation](http://shifat100.github.io/baseapps/doc.html)
+### [Live Demo](https://shifat100.github.io/Ebook-Crafter-KaiOS/play.html)
 
 ---
 
