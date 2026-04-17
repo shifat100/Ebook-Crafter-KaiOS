@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S-Book Builder v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+Bengali:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;--surface3:#22223a;
+  --accent:#ff6b35;--accent2:#ffd700;--accent3:#00d4ff;
+  --text:#e8e8f0;--text2:#9999bb;--border:#2a2a42;
+  --success:#00ff88;--danger:#ff3366;
+  --glow:0 0 20px rgba(255,107,53,.4);--glow2:0 0 20px rgba(0,212,255,.3);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans Bengali',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.app-wrapper{position:relative;z-index:1;}
+
+/* ── Header ── */
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:rgba(10,10,15,.97);backdrop-filter:blur(20px);position:sticky;top:0;z-index:200;}
+.logo{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;}
+.logo span{-webkit-text-fill-color:var(--accent3);}
+.logo small{font-size:9px;letter-spacing:3px;display:block;-webkit-text-fill-color:var(--text2);margin-top:-2px;}
+.header-right{display:flex;gap:8px;align-items:center;}
+
+/* Platform Selector */
+.platform-selector{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-right:8px;}
+.plat-btn{padding:7px 14px;font-family:'Orbitron',monospace;font-size:10px;letter-spacing:.5px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.plat-btn.active{background:var(--accent);color:#fff;box-shadow:var(--glow);}
+.plat-btn:hover:not(.active){background:var(--surface3);color:var(--text);}
+
+/* ── Buttons ── */
+.btn{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:var(--glow);}
+.btn-primary:hover{background:#ff8555;transform:translateY(-1px);}
+.btn-accent{background:transparent;color:var(--accent3);border:1px solid var(--accent3);}
+.btn-accent:hover{background:rgba(0,212,255,.1);}
+.btn-success{background:var(--success);color:#000;font-size:11px;padding:9px 20px;}
+.btn-success:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(0,255,136,.5);}
+.btn-danger{background:var(--danger);color:#fff;font-size:9px;padding:5px 10px;}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm{font-size:9px;padding:5px 10px;}
+.btn-xs{font-size:8px;padding:3px 8px;}
+
+/* ── Layout ── */
+.main-layout{display:grid;grid-template-columns:270px 1fr 290px;min-height:calc(100vh - 57px);}
+
+/* ── Sidebar ── */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.side-tab{flex:1;padding:10px 4px;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:.5px;color:var(--text2);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;transition:all .2s;text-align:center;}
+.side-tab.active{color:var(--accent3);border-bottom-color:var(--accent3);background:rgba(0,212,255,.05);}
+.side-tab:hover:not(.active){color:var(--text);background:var(--surface2);}
+.sidebar-body{flex:1;overflow-y:auto;padding:16px;}
+
+/* ── Form ── */
+.form-group{margin-bottom:13px;}
+label{display:block;font-size:10px;color:var(--text2);margin-bottom:4px;font-weight:600;letter-spacing:.3px;}
+input[type=text],input[type=number],textarea,select{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'Noto Sans Bengali',sans-serif;font-size:12px;padding:7px 9px;transition:border-color .2s;outline:none;}
+input:focus,textarea:focus,select:focus{border-color:var(--accent3);box-shadow:0 0 0 2px rgba(0,212,255,.1);}
+input[type=color]{padding:3px;height:32px;cursor:pointer;border-radius:3px;}
+input[type=range]{width:100%;accent-color:var(--accent);}
+.range-row{display:flex;align-items:center;gap:8px;}
+.range-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);min-width:28px;text-align:right;}
+.section-hdr{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;padding:5px 0;margin-bottom:8px;border-bottom:1px solid var(--border);}
+.divider{height:1px;background:var(--border);margin:12px 0;}
+
+/* ── Drop Zone ── */
+.drop-zone{border:2px dashed var(--border);border-radius:6px;padding:16px;text-align:center;cursor:pointer;transition:all .3s;background:var(--surface2);margin-bottom:10px;position:relative;}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent3);background:rgba(0,212,255,.05);}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-icon{font-size:24px;margin-bottom:4px;}
+.drop-text{font-size:10px;color:var(--text2);}
+.drop-text strong{color:var(--accent3);}
+
+/* ── File List ── */
+.file-list{display:flex;flex-direction:column;gap:5px;margin-top:6px;}
+.file-item{display:flex;align-items:center;gap:7px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:10px;animation:slideIn .2s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.file-item .fi-icon{font-size:14px;flex-shrink:0;}
+.file-item .fi-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-item .fi-size{color:var(--text2);font-size:9px;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.file-item .fi-del{background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:13px;padding:0 2px;opacity:.6;transition:opacity .2s;flex-shrink:0;}
+.file-item .fi-del:hover{opacity:1;}
+
+/* ── Canvas ── */
+.canvas-area{background:var(--bg);overflow-y:auto;padding:20px;}
+.canvas-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.canvas-hdr h2{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--text);letter-spacing:1px;}
+
+/* ── Menu Builder ── */
+.menu-builder{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.mb-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.mb-title{font-family:'Orbitron',monospace;font-size:10px;color:var(--accent2);letter-spacing:1px;}
+.menu-items-list{min-height:50px;padding:10px;display:flex;flex-direction:column;gap:7px;}
+.menu-item-card{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:9px 10px;cursor:grab;transition:all .2s;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.menu-item-card:hover{border-color:var(--accent);}
+.menu-item-card.dragging{opacity:.4;border-style:dashed;}
+.menu-item-card.drag-over{border-color:var(--accent3);background:rgba(0,212,255,.07);}
+.drag-handle{color:var(--text2);font-size:14px;cursor:grab;user-select:none;flex-shrink:0;}
+.mic-info{flex:1;min-width:0;}
+.mic-title{font-size:12px;color:var(--text);font-weight:600;}
+.mic-target{font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.type-badge{font-family:'Orbitron',monospace;font-size:7px;padding:2px 6px;border-radius:3px;letter-spacing:.3px;flex-shrink:0;}
+.type-txt{background:rgba(0,255,136,.15);color:var(--success);border:1px solid rgba(0,255,136,.3);}
+.type-mnu{background:rgba(255,215,0,.15);color:var(--accent2);border:1px solid rgba(255,215,0,.3);}
+.type-exit{background:rgba(255,51,102,.15);color:var(--danger);border:1px solid rgba(255,51,102,.3);}
+
+/* ── Add Item Form ── */
+.add-item-form{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:14px;margin-bottom:16px;}
+.add-item-form h3{font-family:'Orbitron',monospace;font-size:10px;color:var(--accent3);letter-spacing:1px;margin-bottom:12px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ── Right Panel ── */
+.right-panel{background:var(--surface);border-left:1px solid var(--border);padding:16px;overflow-y:auto;}
+.rp-title{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;color:var(--accent3);text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
+/* Phone Preview */
+.preview-phone{width:185px;margin:0 auto 16px;background:#111;border-radius:18px;border:2px solid #333;overflow:hidden;box-shadow:0 0 30px rgba(0,0,0,.7),0 0 0 1px #444;}
+.preview-statusbar{background:#1a1a2e;padding:4px 8px;font-size:8px;color:#aaa;text-align:center;font-family:'JetBrains Mono',monospace;border-bottom:1px solid #222;}
+.preview-content{background:#000;min-height:240px;padding:6px;overflow:hidden;}
+.preview-menu-item{padding:5px 7px;border-bottom:1px solid #1a1a1a;font-size:9px;color:#bbb;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.preview-menu-item.pv-sel{background:#fff;color:#000;}
+.preview-softkeys{display:flex;justify-content:space-between;padding:4px 8px;background:#1a1a1a;border-top:1px solid #2a2a2a;}
+.preview-softkeys span{font-size:7px;color:#fff;font-family:'JetBrains Mono',monospace;}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:9px;text-align:center;}
+.stat-val{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--accent);}
+.stat-label{font-size:8px;color:var(--text2);letter-spacing:.3px;margin-top:2px;}
+
+/* Tree */
+.tree-item{display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:3px;font-size:10px;color:var(--text2);cursor:default;transition:background .15s;}
+.tree-item:hover{background:var(--surface2);}
+.tree-indent{padding-left:16px;}
+.tree-item.folder{color:var(--accent2);}
+.tree-item.file-txt{color:var(--success);}
+.tree-item.file-mnu{color:var(--accent3);}
+.tree-item.file-img{color:#ff88cc;}
+.tree-item.file-snd{color:#aa88ff;}
+
+/* Export */
+.export-section{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:14px;text-align:center;margin-top:14px;}
+.progress-bar{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-top:7px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent3),var(--success));border-radius:2px;transition:width .3s;}
+
+/* ── RICH TEXT EDITOR ── */
+.rte-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.rte-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.rte-header h3{font-family:'Orbitron',monospace;font-size:10px;color:var(--accent3);letter-spacing:1px;}
+
+/* Toolbar */
+.rte-toolbar{display:flex;flex-wrap:wrap;gap:2px;padding:7px 10px;background:var(--surface3);border-bottom:1px solid var(--border);align-items:center;}
+.tb-btn{background:transparent;border:1px solid transparent;border-radius:3px;color:var(--text2);padding:4px 7px;cursor:pointer;font-size:13px;transition:all .15s;line-height:1;display:flex;align-items:center;justify-content:center;min-width:28px;height:26px;}
+.tb-btn:hover{background:var(--surface2);border-color:var(--border);color:var(--text);}
+.tb-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tb-btn[title]{position:relative;}
+.tb-sep{width:1px;height:20px;background:var(--border);margin:0 3px;flex-shrink:0;}
+.tb-select{background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:3px 5px;height:26px;cursor:pointer;outline:none;}
+
+/* Editor area - tabs */
+.editor-tabs{display:flex;background:var(--surface2);border-bottom:1px solid var(--border);}
+.ed-tab{padding:7px 14px;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:.5px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;border:none;background:transparent;}
+.ed-tab.active{color:var(--accent3);border-bottom-color:var(--accent3);}
+.ed-tab:hover:not(.active){background:var(--surface3);}
+
+/* Visual Editor */
+.visual-editor{padding:0;}
+#rte-visual{width:100%;min-height:280px;max-height:450px;overflow-y:auto;padding:14px;outline:none;color:#111;background:#fff;font-family:'Noto Sans Bengali',sans-serif;font-size:14px;line-height:1.7;caret-color:#333;}
+#rte-visual:focus{outline:none;}
+#rte-visual img{max-width:100%;height:auto;border:2px solid #ddd;border-radius:4px;margin:6px 0;display:block;}
+#rte-visual img.selected-img{border-color:#ff6b35;box-shadow:0 0 0 2px rgba(255,107,53,.3);}
+#rte-visual [data-link-block]{background:#e8f4ff;border:1px solid #bee3ff;border-radius:4px;padding:4px 8px;margin:4px 0;display:inline-block;font-size:12px;color:#0066cc;}
+
+/* Code Editor */
+#rte-code{width:100%;min-height:280px;max-height:450px;overflow-y:auto;padding:14px;background:#0d1117;color:#c9d1d9;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;border:none;outline:none;resize:none;tab-size:2;}
+
+/* Image in editor toolbar overlay */
+.img-in-editor{position:relative;display:inline-block;}
+.img-in-editor .img-del-btn{position:absolute;top:4px;right:4px;background:rgba(255,51,102,.9);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1;}
+.img-in-editor:hover .img-del-btn{display:flex;}
+
+/* ── Content File Cards ── */
+.cf-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:10px;animation:fadeIn .25s ease;}
+.cf-card-header{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--surface2);cursor:pointer;}
+.cf-card-header:hover{background:var(--surface3);}
+.cf-filename{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);}
+.cf-actions{display:flex;gap:5px;align-items:center;}
+.cf-body{display:none;padding:10px;}
+.cf-card.expanded .cf-body{display:block;}
+.cf-preview{font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;background:var(--surface3);padding:7px;border-radius:4px;line-height:1.5;white-space:pre-wrap;max-height:80px;overflow:hidden;}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeO .2s ease;}
+@keyframes fadeO{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;width:520px;max-width:96vw;max-height:92vh;overflow-y:auto;animation:modalIn .25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.modal-hdr h2{font-family:'Orbitron',monospace;font-size:13px;color:var(--accent);}
+.modal-close{background:transparent;border:none;color:var(--text2);font-size:18px;cursor:pointer;}
+.modal-close:hover{color:var(--danger);}
+
+/* ── Toast ── */
+.toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px;}
+.toast{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:12px;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;animation:toastIn .3s ease;max-width:280px;}
+.toast.success{border-color:var(--success);}
+.toast.error{border-color:var(--danger);}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* Platform indicator */
+.plat-indicator{font-family:'Orbitron',monospace;font-size:9px;padding:3px 8px;border-radius:3px;letter-spacing:.5px;}
+.plat-kai25{background:rgba(255,215,0,.15);color:var(--accent2);border:1px solid rgba(255,215,0,.3);}
+.plat-kai35{background:rgba(0,212,255,.15);color:var(--accent3);border:1px solid rgba(0,212,255,.3);}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+
+.empty-state{text-align:center;padding:24px 12px;color:var(--text2);}
+.empty-state .ei{font-size:30px;opacity:.3;margin-bottom:6px;}
+.empty-state p{font-size:11px;}
+.badge{font-family:'Orbitron',monospace;font-size:8px;padding:2px 6px;border-radius:3px;background:var(--surface3);color:var(--text2);}
+
+/* link block in visual editor */
+.link-block-edit{background:#1a2a1a;border:1px solid #2a4a2a;border-radius:4px;padding:6px 10px;margin:4px 0;font-size:11px;color:#88ff88;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:8px;cursor:default;}
+.link-block-edit .lb-icon{font-size:14px;}
+.link-block-edit .lb-text{flex:1;}
+.link-block-edit .lb-del{background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:13px;}
+
+/* color grid */
+.color-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.color-row label{flex:1;font-size:10px;margin:0;}
+.color-row input[type=color]{width:36px;height:26px;padding:2px;}
+
+/* Platform warning */
+.plat-note{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:5px;padding:8px 10px;font-size:10px;color:var(--accent2);margin-bottom:10px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div>
+    <div class="logo">S-BOOK <span>BUILDER</span></div>
+    <div class="logo"><small>KAIOS EBOOK APP MAKER v2.0</small></div>
+  </div>
+
+  <!-- Platform Selector -->
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-size:10px;color:var(--text2);font-family:'Orbitron',monospace;">PLATFORM:</span>
+    <div class="platform-selector">
+      <button class="plat-btn active" id="plat-25" onclick="setPlatform('2.5',this)">KaiOS 2.5</button>
+      <button class="plat-btn" id="plat-35" onclick="setPlatform('3.5',this)">KaiOS 3.x</button>
+    </div>
+    <span class="plat-indicator plat-kai25" id="plat-badge">KaiOS 2.5</span>
+  </div>
+
+  <div class="header-right">
+    <button class="btn btn-ghost btn-sm" onclick="resetApp()">🔄 রিসেট</button>
+    <button class="btn btn-accent btn-sm" onclick="showPreview()">👁 প্রিভিউ</button>
+    <button class="btn btn-success" onclick="exportZip()">⬇ ZIP এক্সপোর্ট</button>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<div class="main-layout">
+
+<!-- ══ LEFT SIDEBAR ══ -->
+<div class="sidebar">
+  <div class="sidebar-tabs">
+    <button class="side-tab active" onclick="switchSideTab('info',this)">অ্যাপ</button>
+    <button class="side-tab" onclick="switchSideTab('assets',this)">ফাইল</button>
+    <button class="side-tab" onclick="switchSideTab('settings',this)">সেটিং</button>
+    <button class="side-tab" onclick="switchSideTab('platform',this)">প্ল্যাটফর্ম</button>
+  </div>
+  <div class="sidebar-body">
+
+    <!-- INFO -->
+    <div id="tab-info" class="tab-content active">
+      <div class="form-group"><label>অ্যাপের নাম</label><input type="text" id="app-name" value="আমার ই-বুক" oninput="updatePreview()"></div>
+      <div class="form-group"><label>মেনু শিরোনাম</label><input type="text" id="menu-title" value="MENU" oninput="updatePreview()"></div>
+      <div class="divider"></div>
+      <div class="form-group"><label>Publisher ID (KaiAds)</label><input type="text" id="publisher-id" value="your_publisher_id"></div>
+      <div class="form-group"><label>App Name (KaiAds)</label><input type="text" id="app-id" value="your_app_name"></div>
+      <div class="form-group"><label>Slot Name</label><input type="text" id="slot-name" value="your_slot_name"></div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label>ভেন্ডর লোগো সময় (ms)</label>
+        <div class="range-row"><input type="range" id="vendor-time" min="500" max="5000" step="500" value="2000" oninput="document.getElementById('vt-v').textContent=this.value"><span class="range-val" id="vt-v">2000</span></div>
+      </div>
+      <div class="form-group">
+        <label>স্প্ল্যাশ সময় (ms)</label>
+        <div class="range-row"><input type="range" id="splash-time" min="500" max="6000" step="500" value="2500" oninput="document.getElementById('st-v').textContent=this.value"><span class="range-val" id="st-v">2500</span></div>
+      </div>
+      <div class="form-group">
+        <label>সাউন্ড প্রম্পট</label>
+        <select id="prompt-sound"><option value="yes">হ্যাঁ</option><option value="no">না</option></select>
+      </div>
+    </div>
+
+    <!-- ASSETS -->
+    <div id="tab-assets" class="tab-content" style="display:none">
+      <div class="section-hdr">📷 ছবি (img/)</div>
+      <div class="drop-zone" id="img-drop">
+        <input type="file" accept="image/*" multiple onchange="handleFileUpload('img',this)">
+        <div class="drop-icon">🖼️</div>
+        <div class="drop-text">ছবি ড্রপ বা <strong>ক্লিক</strong><br><small>PNG, JPG, WEBP</small></div>
+      </div>
+      <div class="file-list" id="img-file-list"></div>
+      <div class="divider"></div>
+      <div class="section-hdr">🔊 সাউন্ড (snd/)</div>
+      <div class="drop-zone" id="snd-drop">
+        <input type="file" accept="audio/mp3,audio/mpeg" onchange="handleFileUpload('snd',this)">
+        <div class="drop-icon">🎵</div>
+        <div class="drop-text">MP3 ড্রপ বা <strong>ক্লিক</strong></div>
+      </div>
+      <div class="file-list" id="snd-file-list"></div>
+      <div class="divider"></div>
+      <div class="section-hdr">📌 প্রয়োজনীয় ছবি</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.9;">
+        • <code style="color:var(--accent3)">fon.png</code> ব্যাকগ্রাউন্ড<br>
+        • <code style="color:var(--accent3)">soft_1.png</code> স্ট্যাটাসবার<br>
+        • <code style="color:var(--accent3)">soft_2.png</code> সফটকিবার<br>
+        • <code style="color:var(--accent3)">vendor_logo.png</code> লোগো
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="tab-content" style="display:none">
+      <div class="section-hdr">🎨 রঙ</div>
+      <div class="color-row"><label>ব্যাকগ্রাউন্ড</label><input type="color" id="s-bgColor" value="#000000"></div>
+      <div class="color-row"><label>মেনু ফন্ট</label><input type="color" id="s-menuFont" value="#c8c8c8"></div>
+      <div class="color-row"><label>সিলেক্টেড রঙ</label><input type="color" id="s-menuSel" value="#ffffff"></div>
+      <div class="color-row"><label>কন্টেন্ট রঙ</label><input type="color" id="s-textFont" value="#ffffff"></div>
+      <div class="divider"></div>
+      <div class="section-hdr">📐 লেআউট</div>
+      <div class="form-group">
+        <label>লাইন স্পেসিং: <span id="ls-v" class="range-val">2</span>px</label>
+        <input type="range" id="s-lineSpacing" min="0" max="20" value="2" oninput="document.getElementById('ls-v').textContent=this.value">
+      </div>
+      <div class="form-group"><label>ব্যাকগ্রাউন্ড ছবি</label><select id="s-useBgImage"><option value="yes">হ্যাঁ</option><option value="no">না</option></select></div>
+      <div class="form-group">
+        <label>ডিম লেভেল: <span id="dim-v" class="range-val">60</span></label>
+        <input type="range" id="s-bgDim" min="0" max="255" value="60" oninput="document.getElementById('dim-v').textContent=this.value">
+      </div>
+      <div class="divider"></div>
+      <div class="section-hdr">⚙️ স্ক্রোল</div>
+      <div class="form-group">
+        <label>ম্যানুয়াল স্ক্রোল: <span id="ms-v" class="range-val">30</span></label>
+        <input type="range" id="s-manScroll" min="10" max="100" value="30" oninput="document.getElementById('ms-v').textContent=this.value">
+      </div>
+      <div class="form-group">
+        <label>অটো স্ক্রোল গতি: <span id="as-v" class="range-val">1</span></label>
+        <input type="range" id="s-autoScroll" min="1" max="10" value="1" oninput="document.getElementById('as-v').textContent=this.value">
+      </div>
+    </div>
+
+    <!-- PLATFORM -->
+    <div id="tab-platform" class="tab-content" style="display:none">
+      <div class="section-hdr">🔧 প্ল্যাটফর্ম তথ্য</div>
+      <div id="plat-info-box"></div>
+    </div>
+
+  </div>
+</div><!-- /sidebar -->
+
+<!-- ══ CANVAS ══ -->
+<div class="canvas-area">
+
+  <!-- Menu Builder -->
+  <div class="canvas-hdr">
+    <h2>🗂 মেনু বিল্ডার</h2>
+    <div style="display:flex;gap:7px;">
+      <button class="btn btn-ghost btn-sm" onclick="addSubMenu()">+ সাব-মেনু</button>
+      <button class="btn btn-accent btn-sm" onclick="showAddItemModal()">+ আইটেম যোগ করুন</button>
+    </div>
+  </div>
+
+  <div class="menu-builder">
+    <div class="mb-header">
+      <span class="mb-title">📋 MAIN.MNU</span>
+      <span class="badge" id="main-menu-count">0 আইটেম</span>
+    </div>
+    <div class="menu-items-list" id="menu-items-list">
+      <div class="empty-state"><div class="ei">📋</div><p>+ আইটেম যোগ করুন</p></div>
+    </div>
+  </div>
+  <div id="sub-menus-container"></div>
+
+  <!-- Content Editor -->
+  <div class="canvas-hdr" style="margin-top:8px;">
+    <h2>📝 কন্টেন্ট এডিটর</h2>
+    <div style="display:flex;gap:7px;">
+      <button class="btn btn-ghost btn-sm" onclick="importTxtFile()">📂 ফাইল থেকে আমদানি</button>
+      <button class="btn btn-accent btn-sm" onclick="openEditor(null)">+ নতুন ফাইল</button>
+    </div>
+  </div>
+  <input type="file" id="txt-import-input" accept=".txt,text/plain" style="display:none" onchange="handleTxtImport(this)">
+
+  <!-- Rich Text Editor -->
+  <div class="rte-container" id="rte-container">
+    <div class="rte-header">
+      <h3 id="rte-filename-display">📄 নতুন ফাইল তৈরি করুন...</h3>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-xs" onclick="closeEditor()">✕ বন্ধ</button>
+        <button class="btn btn-primary btn-xs" onclick="saveCurrentFile()">💾 সংরক্ষণ</button>
+      </div>
+    </div>
+
+    <!-- Filename input -->
+    <div style="padding:8px 12px;background:var(--surface3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+      <label style="margin:0;white-space:nowrap;">ফাইলের নাম:</label>
+      <input type="text" id="rte-filename" placeholder="chapter1.txt" style="flex:1;margin:0;">
+    </div>
+
+    <!-- Editor Mode Tabs -->
+    <div class="editor-tabs">
+      <button class="ed-tab active" id="ed-tab-visual" onclick="switchEditorMode('visual',this)">✨ ভিজ্যুয়াল</button>
+      <button class="ed-tab" id="ed-tab-code" onclick="switchEditorMode('code',this)">💻 কোড</button>
+    </div>
+
+    <!-- Toolbar (visual mode only) -->
+    <div class="rte-toolbar" id="rte-toolbar">
+      <!-- Text Style -->
+      <button class="tb-btn" title="Bold" onclick="execCmd('bold')" id="tb-bold"><b>B</b></button>
+      <button class="tb-btn" title="Italic" onclick="execCmd('italic')" id="tb-italic"><i>I</i></button>
+      <button class="tb-btn" title="Underline" onclick="execCmd('underline')" id="tb-underline"><u>U</u></button>
+      <button class="tb-btn" title="Strikethrough" onclick="execCmd('strikeThrough')"><s>S</s></button>
+      <div class="tb-sep"></div>
+      <!-- Heading -->
+      <select class="tb-select" title="হেডিং" onchange="execBlock(this.value);this.value=''">
+        <option value="">হেডিং</option>
+        <option value="h1">H1 বড়</option>
+        <option value="h2">H2 মাঝারি</option>
+        <option value="h3">H3 ছোট</option>
+        <option value="p">সাধারণ</option>
+      </select>
+      <!-- Font Size -->
+      <select class="tb-select" title="ফন্ট সাইজ" onchange="execCmd('fontSize',this.value);this.value=''">
+        <option value="">সাইজ</option>
+        <option value="1">ছোট (10px)</option>
+        <option value="3">সাধারণ (14px)</option>
+        <option value="4">বড় (16px)</option>
+        <option value="5">অনেক বড় (18px)</option>
+        <option value="6">বিশাল (24px)</option>
+      </select>
+      <div class="tb-sep"></div>
+      <!-- Alignment -->
+      <button class="tb-btn" title="বাম" onclick="execCmd('justifyLeft')">⬅</button>
+      <button class="tb-btn" title="মাঝখান" onclick="execCmd('justifyCenter')">↔</button>
+      <button class="tb-btn" title="ডান" onclick="execCmd('justifyRight')">➡</button>
+      <div class="tb-sep"></div>
+      <!-- Lists -->
+      <button class="tb-btn" title="বুলেট লিস্ট" onclick="execCmd('insertUnorderedList')">• লিস্ট</button>
+      <button class="tb-btn" title="নম্বর লিস্ট" onclick="execCmd('insertOrderedList')">1. লিস্ট</button>
+      <div class="tb-sep"></div>
+      <!-- Color -->
+      <input type="color" title="লেখার রঙ" class="tb-btn" style="width:30px;height:26px;padding:2px;cursor:pointer;" onchange="execCmd('foreColor',this.value)" value="#333333">
+      <div class="tb-sep"></div>
+      <!-- Media -->
+      <button class="tb-btn" title="ছবি যোগ করুন" onclick="insertImageInEditor()">🖼️ ছবি</button>
+      <button class="tb-btn" title="লিংক যোগ করুন" onclick="insertLinkBlock()">🔗 লিংক</button>
+      <button class="tb-btn" title="লাইন যোগ করুন" onclick="execCmd('insertHorizontalRule')">— লাইন</button>
+      <div class="tb-sep"></div>
+      <!-- Undo/Redo -->
+      <button class="tb-btn" title="পূর্বাবস্থা" onclick="execCmd('undo')">↩</button>
+      <button class="tb-btn" title="পুনরায়" onclick="execCmd('redo')">↪</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" title="সব মুছুন" onclick="clearEditor()" style="color:var(--danger);">🗑</button>
+    </div>
+
+    <!-- Visual Editor -->
+    <div class="visual-editor" id="ed-visual-panel">
+      <div id="rte-visual" contenteditable="true" spellcheck="false"
+        onkeyup="onEditorChange()" oninput="onEditorChange()"
+        onmouseup="updateToolbarState()" onkeydown="handleEditorKeydown(event)"
+        style="min-height:300px;">
+        <p>এখানে লিখুন...</p>
+      </div>
+    </div>
+
+    <!-- Code Editor -->
+    <div id="ed-code-panel" style="display:none">
+      <textarea id="rte-code" spellcheck="false" oninput="onCodeChange()" placeholder="# S-Book টেক্সট ফরম্যাট
+সাধারণ লেখা এভাবে লিখুন
+
+[IMG]
+filename.png
+
+###
+লিংকের শিরোনাম
+https://example.com
+###"></textarea>
+    </div>
+
+    <!-- Status bar -->
+    <div style="padding:5px 12px;background:var(--surface3);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:9px;color:var(--text2);" id="ed-wordcount">0 শব্দ</span>
+      <span style="font-size:9px;color:var(--text2);" id="ed-charcount">0 অক্ষর</span>
+      <span style="font-size:9px;color:var(--accent3);" id="ed-mode-label">ভিজ্যুয়াল মোড</span>
+    </div>
+  </div>
+
+  <!-- Saved Files List -->
+  <div class="canvas-hdr">
+    <h2>📁 সংরক্ষিত ফাইলসমূহ</h2>
+    <span class="badge" id="cf-count">0 ফাইল</span>
+  </div>
+  <div id="content-files-list">
+    <div class="empty-state"><div class="ei">📁</div><p>কোনো ফাইল নেই</p></div>
+  </div>
+
+</div><!-- /canvas -->
+
+<!-- ══ RIGHT PANEL ══ -->
+<div class="right-panel">
+  <p class="rp-title">📱 লাইভ প্রিভিউ</p>
+  <div class="preview-phone">
+    <div class="preview-statusbar" id="pv-statusbar">আমার ই-বুক</div>
+    <div class="preview-content" id="pv-content">
+      <div class="preview-menu-item pv-sel">📂 মেনু আইটেম</div>
+    </div>
+    <div class="preview-softkeys"><span></span><span>SELECT</span><span>EXIT</span></div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-box"><div class="stat-val" id="st-menu">0</div><div class="stat-label">মেনু</div></div>
+    <div class="stat-box"><div class="stat-val" id="st-txt">0</div><div class="stat-label">TXT ফাইল</div></div>
+    <div class="stat-box"><div class="stat-val" id="st-img">0</div><div class="stat-label">ছবি</div></div>
+    <div class="stat-box"><div class="stat-val" id="st-snd">0</div><div class="stat-label">সাউন্ড</div></div>
+  </div>
+
+  <p class="rp-title">📂 ফাইল স্ট্রাকচার</p>
+  <div id="struct-tree"></div>
+
+  <div class="export-section">
+    <h3 style="font-family:'Orbitron',monospace;font-size:10px;color:var(--text2);margin-bottom:10px;letter-spacing:1px;">এক্সপোর্ট</h3>
+    <button class="btn btn-success" style="width:100%" onclick="exportZip()">⬇ ZIP ডাউনলোড</button>
+    <div class="progress-bar" id="export-progress" style="display:none"><div class="progress-fill" id="export-fill" style="width:0%"></div></div>
+  </div>
+</div><!-- /right-panel -->
+
+</div><!-- /main-layout -->
+</div><!-- /app-wrapper -->
+
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ADD MENU ITEM MODAL -->
+<div id="modal-add-item" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-hdr"><h2>➕ মেনু আইটেম</h2><button class="modal-close" onclick="closeModal('modal-add-item')">✕</button></div>
+    <div class="form-group"><label>শিরোনাম</label><input type="text" id="ni-title" placeholder="অধ্যায় ১"></div>
+    <div class="form-group"><label>ধরন</label><select id="ni-type" onchange="updateNiTarget()"><option value="txt">📝 TXT কন্টেন্ট</option><option value="mnu">📋 MNU সাব-মেনু</option><option value="exit">🚪 এক্সিট</option></select></div>
+    <div class="form-group" id="ni-target-grp"><label>ফাইলের নাম</label><input type="text" id="ni-target" placeholder="chapter1.txt"><p style="font-size:9px;color:var(--text2);margin-top:3px;">এক্সটেনশনসহ লিখুন (.txt / .mnu)</p></div>
+    <div class="form-group"><label>যে মেনুতে যোগ করবেন</label><select id="ni-menu-sel"><option value="main">main.mnu (মূল)</option></select></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-item')">বাতিল</button>
+      <button class="btn btn-primary" onclick="addMenuItem()">যোগ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- LINK INSERT MODAL -->
+<div id="modal-link" class="modal-overlay" style="display:none">
+  <div class="modal" style="width:420px;">
+    <div class="modal-hdr"><h2>🔗 লিংক যোগ করুন</h2><button class="modal-close" onclick="closeModal('modal-link')">✕</button></div>
+    <div class="form-group"><label>লিংকের নাম / শিরোনাম</label><input type="text" id="link-title" placeholder="যেমনঃ আরও পড়ুন"></div>
+    <div class="form-group"><label>URL</label><input type="text" id="link-url" placeholder="https://example.com"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-link')">বাতিল</button>
+      <button class="btn btn-primary" onclick="confirmInsertLink()">যোগ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE INSERT MODAL -->
+<div id="modal-img-insert" class="modal-overlay" style="display:none">
+  <div class="modal" style="width:420px;">
+    <div class="modal-hdr"><h2>🖼️ ছবি যোগ করুন</h2><button class="modal-close" onclick="closeModal('modal-img-insert')">✕</button></div>
+    <div class="form-group"><label>ডিভাইস থেকে ছবি আপলোড করুন</label>
+      <div class="drop-zone" style="position:relative;">
+        <input type="file" accept="image/*" id="editor-img-input" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;" onchange="handleEditorImageUpload(this)">
+        <div class="drop-icon">📁</div>
+        <div class="drop-text">ছবি বেছে নিন বা ড্রপ করুন</div>
+      </div>
+    </div>
+    <div class="form-group"><label>অথবা img/ ফোল্ডারের ফাইলের নাম লিখুন</label><input type="text" id="editor-img-name" placeholder="photo1.jpg"></div>
+    <div id="editor-img-preview" style="display:none;margin-bottom:10px;"><img id="eip-img" style="max-width:100%;max-height:120px;border-radius:4px;border:1px solid var(--border);" src="" alt=""></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-img-insert')">বাতিল</button>
+      <button class="btn btn-primary" onclick="confirmInsertImage()">যোগ করুন</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let state = {
+  platform: '2.5',
+  menuItems: [],
+  subMenus: [],
+  contentFiles: [],
+  assets: { img: [], snd: [] },
+  dragSrc: null,
+  editingFileId: null,
+  editorMode: 'visual', // 'visual' | 'code'
+  editorImageData: null, // base64 for newly uploaded image
+  editorImageName: null,
+  savedSelection: null
+};
+let _uid = 0;
+const uid = () => ++_uid;
+
+// ══════════════════════════════════════════════════
+// PLATFORM
+// ══════════════════════════════════════════════════
+function setPlatform(ver, btn) {
+  state.platform = ver;
+  document.querySelectorAll('.plat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const badge = document.getElementById('plat-badge');
+  if (ver === '2.5') {
+    badge.textContent = 'KaiOS 2.5';
+    badge.className = 'plat-indicator plat-kai25';
+  } else {
+    badge.textContent = 'KaiOS 3.x';
+    badge.className = 'plat-indicator plat-kai35';
+  }
+  renderPlatformInfo();
+  showToast('প্ল্যাটফর্ম: KaiOS ' + ver + ' সেট হয়েছে');
+}
+
+function renderPlatformInfo() {
+  const box = document.getElementById('plat-info-box');
+  const is25 = state.platform === '2.5';
+  box.innerHTML = `
+    <div class="plat-note">
+      <strong>${is25 ? '📱 KaiOS 2.5' : '📱 KaiOS 3.x'}</strong><br>
+      ${is25 ? `
+      • MozActivity API ব্যবহার করে লিংক খোলে<br>
+      • manifest.webapp ফরম্যাট<br>
+      • KaiAds SDK v5 সাপোর্ট<br>
+      • কী-বেইজড নেভিগেশন (SoftLeft/SoftRight/F1/F2)<br>
+      • পুরনো WebAPI সমর্থিত
+      ` : `
+      • window.open() দিয়ে লিংক খোলে<br>
+      • manifest.webmanifest ফরম্যাট<br>
+      • PWA স্টাইল অ্যাপ<br>
+      • আধুনিক JavaScript সাপোর্ট<br>
+      • Touch + কী উভয় নেভিগেশন
+      `}
+    </div>
+    <div style="font-size:10px;color:var(--text2);line-height:1.8;">
+      <strong style="color:var(--text);">এক্সপোর্টে পার্থক্য:</strong><br>
+      ${is25 ? '• manifest.webapp তৈরি হবে<br>• MozActivity লিংক কোড<br>• window.close() এক্সিট' :
+               '• manifest.webmanifest তৈরি হবে<br>• window.open() লিংক কোড<br>• history.back() নেভিগেশন'}
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════
+// SIDE TABS
+// ══════════════════════════════════════════════════
+function switchSideTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => { el.style.display = 'none'; });
+  document.querySelectorAll('.side-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = 'block';
+  btn.classList.add('active');
+  if (name === 'platform') renderPlatformInfo();
+}
+// show first tab
+document.getElementById('tab-info').style.display = 'block';
+
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function showToast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = (type === 'success' ? '✅' : '❌') + ' ' + msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function esc(str) { return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatSize(b) { if (b < 1024) return b + 'B'; if (b < 1048576) return (b/1024).toFixed(1)+'KB'; return (b/1048576).toFixed(1)+'MB'; }
+function hexToRgb(hex) { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return r+','+g+','+b; }
+function hexToArgb(hex,a=255) { return a+','+hexToRgb(hex); }
+
+// ══════════════════════════════════════════════════
+// RICH TEXT EDITOR
+// ══════════════════════════════════════════════════
+let currentEdMode = 'visual';
+let editorDirty = false;
+
+function switchEditorMode(mode, btn) {
+  currentEdMode = mode;
+  document.querySelectorAll('.ed-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const vPanel = document.getElementById('ed-visual-panel');
+  const cPanel = document.getElementById('ed-code-panel');
+  const toolbar = document.getElementById('rte-toolbar');
+  const modeLabel = document.getElementById('ed-mode-label');
+
+  if (mode === 'visual') {
+    // Convert code -> visual
+    const codeVal = document.getElementById('rte-code').value;
+    document.getElementById('rte-visual').innerHTML = sbookTxtToHtml(codeVal);
+    vPanel.style.display = 'block';
+    cPanel.style.display = 'none';
+    toolbar.style.display = 'flex';
+    modeLabel.textContent = 'ভিজ্যুয়াল মোড';
+  } else {
+    // Convert visual -> code
+    const html = document.getElementById('rte-visual').innerHTML;
+    document.getElementById('rte-code').value = htmlToSbookTxt(html);
+    vPanel.style.display = 'none';
+    cPanel.style.display = 'block';
+    toolbar.style.display = 'none';
+    modeLabel.textContent = 'কোড মোড';
+  }
+  updateWordCount();
+}
+
+// Convert S-Book .txt format -> HTML for visual editor
+function sbookTxtToHtml(txt) {
+  if (!txt || !txt.trim()) return '<p>এখানে লিখুন...</p>';
+  const lines = txt.split('\n');
+  let html = '';
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (trimmed === '###') {
+      // link block
+      i++;
+      const title = (lines[i] || '').trim(); i++;
+      const url = (lines[i] || '').trim(); i++;
+      if ((lines[i] || '').trim() === '###') i++;
+      html += `<div class="link-block-edit" contenteditable="false" data-link-title="${esc(title)}" data-link-url="${esc(url)}"><span class="lb-icon">🔗</span><span class="lb-text">${esc(title)} — <small>${esc(url)}</small></span><button class="lb-del" onclick="this.parentElement.remove()">✕</button></div>`;
+    } else if (trimmed === '[IMG]') {
+      i++;
+      const imgName = (lines[i] || '').trim(); i++;
+      if (imgName) {
+        // find in assets
+        const asset = state.assets.img.find(a => a.name === imgName);
+        const src = asset ? asset.data : ('img/' + imgName);
+        html += `<img src="${esc(src)}" alt="${esc(imgName)}" data-imgname="${esc(imgName)}" style="max-width:100%;margin:6px 0;display:block;">`;
+      }
+    } else if (trimmed === '') {
+      html += '<p><br></p>';
+      i++;
+    } else {
+      html += '<p>' + esc(line) + '</p>';
+      i++;
+    }
+  }
+  return html || '<p>এখানে লিখুন...</p>';
+}
+
+// Convert HTML -> S-Book .txt format
+function htmlToSbookTxt(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  let txt = '';
+
+  function processNode(node) {
+    if (node.nodeType === 3) { // text
+      txt += node.textContent;
+    } else if (node.nodeType === 1) {
+      const tag = node.tagName.toLowerCase();
+      // Link block
+      if (node.classList && node.classList.contains('link-block-edit')) {
+        const t = node.getAttribute('data-link-title') || '';
+        const u = node.getAttribute('data-link-url') || '';
+        txt += '\n###\n' + t + '\n' + u + '\n###\n';
+        return;
+      }
+      // Image
+      if (tag === 'img') {
+        const imgName = node.getAttribute('data-imgname') || node.getAttribute('alt') || '';
+        txt += '\n[IMG]\n' + imgName + '\n';
+        return;
+      }
+      // Block elements -> newlines
+      const blockTags = ['p','div','h1','h2','h3','h4','h5','h6','li','tr','br'];
+      const isBlock = blockTags.includes(tag);
+      if (tag === 'br') { txt += '\n'; return; }
+      for (const child of node.childNodes) processNode(child);
+      if (isBlock) { txt += '\n'; }
+    }
+  }
+
+  for (const child of div.childNodes) processNode(child);
+  return txt.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function execCmd(cmd, val) {
+  document.getElementById('rte-visual').focus();
+  document.execCommand(cmd, false, val || null);
+  updateToolbarState();
+  onEditorChange();
+}
+
+function execBlock(val) {
+  if (!val) return;
+  document.getElementById('rte-visual').focus();
+  document.execCommand('formatBlock', false, val);
+  updateToolbarState();
+}
+
+function updateToolbarState() {
+  const cmds = ['bold','italic','underline'];
+  cmds.forEach(cmd => {
+    const btn = document.getElementById('tb-' + cmd);
+    if (btn) btn.classList.toggle('active', document.queryCommandState(cmd));
+  });
+}
+
+function handleEditorKeydown(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    execCmd('insertText', '    ');
+  }
+}
+
+function onEditorChange() {
+  editorDirty = true;
+  updateWordCount();
+}
+
+function onCodeChange() {
+  editorDirty = true;
+  updateWordCount();
+}
+
+function updateWordCount() {
+  let text = '';
+  if (currentEdMode === 'visual') {
+    text = document.getElementById('rte-visual').innerText || '';
+  } else {
+    text = document.getElementById('rte-code').value || '';
+  }
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  document.getElementById('ed-wordcount').textContent = words + ' শব্দ';
+  document.getElementById('ed-charcount').textContent = text.length + ' অক্ষর';
+}
+
+function clearEditor() {
+  if (confirm('এডিটরের সব কন্টেন্ট মুছবেন?')) {
+    document.getElementById('rte-visual').innerHTML = '<p>এখানে লিখুন...</p>';
+    document.getElementById('rte-code').value = '';
+    updateWordCount();
+  }
+}
+
+// ── Image in editor ──
+function insertImageInEditor() {
+  state.editorImageData = null;
+  state.editorImageName = null;
+  document.getElementById('editor-img-name').value = '';
+  document.getElementById('editor-img-preview').style.display = 'none';
+  document.getElementById('editor-img-input').value = '';
+  openModal('modal-img-insert');
+}
+
+function handleEditorImageUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.editorImageData = e.target.result;
+    state.editorImageName = file.name;
+    document.getElementById('editor-img-name').value = file.name;
+    const prev = document.getElementById('editor-img-preview');
+    document.getElementById('eip-img').src = e.target.result;
+    prev.style.display = 'block';
+    // Also add to assets
+    if (!state.assets.img.find(a => a.name === file.name)) {
+      state.assets.img.push({ name: file.name, data: e.target.result, file });
+      renderAssetList('img');
+      updateStats();
+      updateStructTree();
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveSelectionForInsert() {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) {
+    state.savedSelection = sel.getRangeAt(0).cloneRange();
+  }
+}
+
+function restoreSelection() {
+  if (state.savedSelection) {
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(state.savedSelection);
+  }
+}
+
+// save selection before opening modals
+document.getElementById('rte-visual').addEventListener('mouseup', saveSelectionForInsert);
+document.getElementById('rte-visual').addEventListener('keyup', saveSelectionForInsert);
+
+function confirmInsertImage() {
+  const nameInput = document.getElementById('editor-img-name').value.trim();
+  const imgName = nameInput || state.editorImageName;
+  if (!imgName) { showToast('ছবির নাম দিন!', 'error'); return; }
+
+  const asset = state.assets.img.find(a => a.name === imgName);
+  const src = asset ? asset.data : ('img/' + imgName);
+
+  restoreSelection();
+  document.getElementById('rte-visual').focus();
+
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = imgName;
+  img.setAttribute('data-imgname', imgName);
+  img.style.cssText = 'max-width:100%;margin:6px 0;display:block;';
+
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) {
+    const range = sel.getRangeAt(0);
+    range.collapse(false);
+    range.insertNode(img);
+    range.setStartAfter(img);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } else {
+    document.getElementById('rte-visual').appendChild(img);
+  }
+
+  closeModal('modal-img-insert');
+  onEditorChange();
+  showToast('ছবি যোগ হয়েছে');
+}
+
+// ── Link block ──
+function insertLinkBlock() {
+  document.getElementById('link-title').value = '';
+  document.getElementById('link-url').value = '';
+  saveSelectionForInsert();
+  openModal('modal-link');
+  setTimeout(() => document.getElementById('link-title').focus(), 100);
+}
+
+function confirmInsertLink() {
+  const title = document.getElementById('link-title').value.trim();
+  const url = document.getElementById('link-url').value.trim();
+  if (!title || !url) { showToast('নাম ও URL দিন!', 'error'); return; }
+
+  restoreSelection();
+  document.getElementById('rte-visual').focus();
+
+  const block = document.createElement('div');
+  block.className = 'link-block-edit';
+  block.contentEditable = 'false';
+  block.setAttribute('data-link-title', title);
+  block.setAttribute('data-link-url', url);
+  block.innerHTML = `<span class="lb-icon">🔗</span><span class="lb-text">${esc(title)} — <small>${esc(url)}</small></span><button class="lb-del" onclick="this.parentElement.remove()">✕</button>`;
+
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) {
+    const range = sel.getRangeAt(0);
+    range.collapse(false);
+    range.insertNode(block);
+    const after = document.createElement('p');
+    after.innerHTML = '<br>';
+    block.parentNode.insertBefore(after, block.nextSibling);
+    range.setStartAfter(after);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } else {
+    document.getElementById('rte-visual').appendChild(block);
+  }
+
+  closeModal('modal-link');
+  onEditorChange();
+  showToast('লিংক যোগ হয়েছে');
+}
+
+// ══════════════════════════════════════════════════
+// EDITOR FILE OPS
+// ══════════════════════════════════════════════════
+function openEditor(fileId) {
+  state.editingFileId = fileId;
+  if (fileId === null) {
+    // New file
+    document.getElementById('rte-filename').value = '';
+    document.getElementById('rte-visual').innerHTML = '<p>এখানে লিখুন...</p>';
+    document.getElementById('rte-code').value = '';
+    document.getElementById('rte-filename-display').textContent = '📄 নতুন ফাইল';
+  } else {
+    const cf = state.contentFiles.find(c => c.id === fileId);
+    if (!cf) return;
+    document.getElementById('rte-filename').value = cf.filename;
+    document.getElementById('rte-filename-display').textContent = '📄 ' + cf.filename;
+    if (currentEdMode === 'visual') {
+      document.getElementById('rte-visual').innerHTML = sbookTxtToHtml(cf.content);
+    } else {
+      document.getElementById('rte-code').value = cf.content;
+    }
+  }
+  editorDirty = false;
+  updateWordCount();
+  document.getElementById('rte-visual').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeEditor() {
+  if (editorDirty && !confirm('পরিবর্তন সংরক্ষণ না করে বন্ধ করবেন?')) return;
+  document.getElementById('rte-filename').value = '';
+  document.getElementById('rte-visual').innerHTML = '<p>এখানে লিখুন...</p>';
+  document.getElementById('rte-code').value = '';
+  document.getElementById('rte-filename-display').textContent = '📄 নতুন ফাইল তৈরি করুন...';
+  state.editingFileId = null;
+  editorDirty = false;
+  updateWordCount();
+}
+
+function saveCurrentFile() {
+  let filename = document.getElementById('rte-filename').value.trim();
+  if (!filename) { showToast('ফাইলের নাম দিন!', 'error'); return; }
+  if (!filename.endsWith('.txt')) filename += '.txt';
+  document.getElementById('rte-filename').value = filename;
+
+  let content = '';
+  if (currentEdMode === 'visual') {
+    content = htmlToSbookTxt(document.getElementById('rte-visual').innerHTML);
+  } else {
+    content = document.getElementById('rte-code').value;
+  }
+
+  if (state.editingFileId === null) {
+    // Check duplicate
+    if (state.contentFiles.find(c => c.filename === filename)) {
+      showToast('"' + filename + '" ইতিমধ্যে আছে! অন্য নাম দিন।', 'error'); return;
+    }
+    const newFile = { id: uid(), filename, content };
+    state.contentFiles.push(newFile);
+    state.editingFileId = newFile.id;
+    showToast('"' + filename + '" সংরক্ষিত হয়েছে');
+  } else {
+    const cf = state.contentFiles.find(c => c.id === state.editingFileId);
+    if (cf) { cf.filename = filename; cf.content = content; }
+    showToast('"' + filename + '" আপডেট হয়েছে');
+  }
+
+  document.getElementById('rte-filename-display').textContent = '📄 ' + filename;
+  editorDirty = false;
+  renderContentFilesList();
+  updateStats();
+  updateStructTree();
+}
+
+// ── Import TXT from device ──
+function importTxtFile() {
+  document.getElementById('txt-import-input').click();
+}
+
+function handleTxtImport(input) {
+  const files = Array.from(input.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const content = e.target.result;
+      let fname = file.name;
+      if (!fname.endsWith('.txt')) fname += '.txt';
+
+      // Check duplicate
+      if (state.contentFiles.find(c => c.filename === fname)) {
+        // ask override
+        if (!confirm('"' + fname + '" ইতিমধ্যে আছে। ওভাররাইট করবেন?')) return;
+        const ex = state.contentFiles.find(c => c.filename === fname);
+        ex.content = content;
+        showToast('"' + fname + '" আপডেট হয়েছে');
+      } else {
+        state.contentFiles.push({ id: uid(), filename: fname, content });
+        showToast('"' + fname + '" আমদানি হয়েছে');
+      }
+      renderContentFilesList();
+      updateStats();
+      updateStructTree();
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+  input.value = '';
+}
+
+function renderContentFilesList() {
+  const el = document.getElementById('content-files-list');
+  document.getElementById('cf-count').textContent = state.contentFiles.length + ' ফাইল';
+  if (state.contentFiles.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="ei">📁</div><p>কোনো ফাইল নেই</p></div>';
+    return;
+  }
+  el.innerHTML = '';
+  state.contentFiles.forEach(cf => {
+    const preview = cf.content.substring(0, 100).replace(/\n/g, ' ');
+    const card = document.createElement('div');
+    card.className = 'cf-card';
+    card.innerHTML = `
+      <div class="cf-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <span class="cf-filename">📄 ${esc(cf.filename)}</span>
+        <div class="cf-actions">
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openEditor(${cf.id})">✏️ সম্পাদনা</button>
+          <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();deleteContentFile(${cf.id})">✕</button>
+          <span style="color:var(--text2);margin-left:4px;">▾</span>
+        </div>
+      </div>
+      <div class="cf-body">
+        <div class="cf-preview">${esc(preview)}${cf.content.length > 100 ? '...' : ''}</div>
+        <div style="margin-top:7px;font-size:9px;color:var(--text2);">📊 ${cf.content.length} অক্ষর · ${cf.content.split('\n').length} লাইন</div>
+      </div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+function deleteContentFile(id) {
+  if (!confirm('এই ফাইল মুছবেন?')) return;
+  state.contentFiles = state.contentFiles.filter(c => c.id !== id);
+  if (state.editingFileId === id) closeEditor();
+  renderContentFilesList();
+  updateStats();
+  updateStructTree();
+  showToast('ফাইল মুছে গেছে', 'error');
+}
+
+// ══════════════════════════════════════════════════
+// MENU BUILDER
+// ══════════════════════════════════════════════════
+function showAddItemModal() {
+  document.getElementById('ni-title').value = '';
+  document.getElementById('ni-target').value = '';
+  document.getElementById('ni-type').value = 'txt';
+  updateNiTarget();
+  updateNiMenuSelect();
+  openModal('modal-add-item');
+  setTimeout(() => document.getElementById('ni-title').focus(), 100);
+}
+
+function updateNiTarget() {
+  const type = document.getElementById('ni-type').value;
+  const grp = document.getElementById('ni-target-grp');
+  const inp = document.getElementById('ni-target');
+  grp.style.display = type === 'exit' ? 'none' : 'block';
+  if (type !== 'exit') inp.placeholder = type === 'txt' ? 'chapter1.txt' : 'submenu1.mnu';
+}
+
+function updateNiMenuSelect() {
+  const sel = document.getElementById('ni-menu-sel');
+  sel.innerHTML = '<option value="main">main.mnu (মূল)</option>';
+  state.subMenus.forEach(sm => sel.innerHTML += `<option value="${sm.id}">${esc(sm.name)}</option>`);
+}
+
+function addMenuItem() {
+  const title = document.getElementById('ni-title').value.trim();
+  const type = document.getElementById('ni-type').value;
+  const target = type === 'exit' ? '[EXIT]' : document.getElementById('ni-target').value.trim();
+  const menuId = document.getElementById('ni-menu-sel').value;
+  if (!title) { showToast('শিরোনাম দিন!', 'error'); return; }
+  if (type !== 'exit' && !target) { showToast('ফাইলের নাম দিন!', 'error'); return; }
+  if (type === 'txt' && target && !target.endsWith('.txt')) { showToast('.txt এক্সটেনশন দিন', 'error'); return; }
+  if (type === 'mnu' && target && !target.endsWith('.mnu')) { showToast('.mnu এক্সটেনশন দিন', 'error'); return; }
+  const item = { id: uid(), title, target, type, menuId };
+  if (menuId === 'main') state.menuItems.push(item);
+  else { const sm = state.subMenus.find(s => s.id == menuId); if (sm) sm.items.push(item); }
+  closeModal('modal-add-item');
+  renderMenuBuilder();
+  updatePreview();
+  updateStats();
+  updateStructTree();
+  showToast('"' + title + '" যোগ হয়েছে');
+}
+
+function deleteMenuItem(id, menuId) {
+  if (menuId === 'main') state.menuItems = state.menuItems.filter(i => i.id !== id);
+  else { const sm = state.subMenus.find(s => s.id == menuId); if (sm) sm.items = sm.items.filter(i => i.id !== id); }
+  renderMenuBuilder(); updatePreview(); updateStats(); updateStructTree();
+}
+
+function addSubMenu() {
+  const name = prompt('সাব-মেনুর ফাইলের নাম দিন:');
+  if (!name) return;
+  const filename = name.endsWith('.mnu') ? name : name + '.mnu';
+  state.subMenus.push({ id: uid(), name: filename, items: [] });
+  renderMenuBuilder(); updateStructTree();
+  showToast('"' + filename + '" সাব-মেনু যোগ হয়েছে');
+}
+
+function deleteSubMenu(id) {
+  if (!confirm('সাব-মেনু মুছবেন?')) return;
+  state.subMenus = state.subMenus.filter(s => s.id !== id);
+  renderMenuBuilder(); updateStats(); updateStructTree();
+}
+
+function renderMenuBuilder() {
+  renderMenuList('menu-items-list', state.menuItems, 'main');
+  document.getElementById('main-menu-count').textContent = state.menuItems.length + ' আইটেম';
+  const sub = document.getElementById('sub-menus-container');
+  sub.innerHTML = '';
+  state.subMenus.forEach(sm => {
+    const div = document.createElement('div');
+    div.className = 'menu-builder';
+    div.innerHTML = `
+      <div class="mb-header">
+        <span class="mb-title">📋 ${esc(sm.name)}</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="badge">${sm.items.length} আইটেম</span>
+          <button class="btn btn-danger btn-xs" onclick="deleteSubMenu(${sm.id})">✕ মুছুন</button>
+        </div>
+      </div>
+      <div class="menu-items-list" id="ml-${sm.id}"></div>
+    `;
+    sub.appendChild(div);
+    renderMenuList('ml-' + sm.id, sm.items, sm.id);
+  });
+}
+
+function renderMenuList(containerId, items, menuId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (items.length === 0) { el.innerHTML = '<div class="empty-state"><div class="ei">📋</div><p>খালি</p></div>'; return; }
+  el.innerHTML = '';
+  items.forEach((item, idx) => {
+    const tc = item.type === 'txt' ? 'type-txt' : item.type === 'mnu' ? 'type-mnu' : 'type-exit';
+    const tl = item.type === 'txt' ? 'TXT' : item.type === 'mnu' ? 'MNU' : 'EXIT';
+    const card = document.createElement('div');
+    card.className = 'menu-item-card';
+    card.draggable = true;
+    card.dataset.id = item.id;
+    card.innerHTML = `
+      <span class="drag-handle">⠿</span>
+      <div class="mic-info">
+        <div class="mic-title">${esc(item.title)}</div>
+        <div class="mic-target">${esc(item.target)}</div>
+      </div>
+      <span class="type-badge ${tc}">${tl}</span>
+      <button class="btn btn-danger btn-xs" onclick="deleteMenuItem(${item.id},'${menuId}')">✕</button>
+    `;
+    // Drag events
+    card.addEventListener('dragstart', e => { state.dragSrc = { id: item.id, menuId, idx }; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('drag-over'); });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault(); card.classList.remove('drag-over');
+      if (!state.dragSrc || state.dragSrc.id === item.id) return;
+      const src = state.dragSrc;
+      if (src.menuId == menuId) {
+        const arr = menuId === 'main' ? state.menuItems : state.subMenus.find(s => s.id == menuId).items;
+        const [moved] = arr.splice(src.idx, 1);
+        arr.splice(idx, 0, moved);
+        renderMenuBuilder(); updatePreview();
+      }
+      state.dragSrc = null;
+    });
+    el.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// ASSETS
+// ══════════════════════════════════════════════════
+function handleFileUpload(type, input) {
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (state.assets[type].find(a => a.name === file.name)) {
+        showToast('"' + file.name + '" ইতিমধ্যে আছে!', 'error'); return;
+      }
+      state.assets[type].push({ name: file.name, data: e.target.result, file });
+      renderAssetList(type); updateStats(); updateStructTree();
+      showToast('"' + file.name + '" যোগ হয়েছে');
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function deleteAsset(type, name) {
+  state.assets[type] = state.assets[type].filter(a => a.name !== name);
+  renderAssetList(type); updateStats(); updateStructTree();
+}
+
+function renderAssetList(type) {
+  const el = document.getElementById(type + '-file-list');
+  el.innerHTML = '';
+  state.assets[type].forEach(asset => {
+    const icon = type === 'img' ? '🖼️' : '🎵';
+    const size = asset.file ? formatSize(asset.file.size) : '';
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    let preview = '';
+    if (type === 'img') preview = `<img src="${asset.data}" style="width:28px;height:28px;object-fit:cover;border-radius:3px;flex-shrink:0;">`;
+    item.innerHTML = `${preview}<span class="fi-icon">${preview ? '' : icon}</span><span class="fi-name">${esc(asset.name)}</span><span class="fi-size">${size}</span><button class="fi-del" onclick="deleteAsset('${type}','${esc(asset.name)}')">✕</button>`;
+    el.appendChild(item);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// PREVIEW & STATS
+// ══════════════════════════════════════════════════
+function updatePreview() {
+  const title = document.getElementById('app-name').value || 'আমার ই-বুক';
+  document.getElementById('pv-statusbar').textContent = title;
+  const pvc = document.getElementById('pv-content');
+  if (state.menuItems.length === 0) {
+    pvc.innerHTML = '<div style="color:#333;text-align:center;padding:20px;font-size:9px;">মেনু খালি</div>';
+    return;
+  }
+  pvc.innerHTML = state.menuItems.slice(0, 10).map((item, i) =>
+    `<div class="preview-menu-item${i === 0 ? ' pv-sel' : ''}">${esc(item.title)}</div>`
+  ).join('');
+}
+
+function updateStats() {
+  const total = state.menuItems.length + state.subMenus.reduce((a, s) => a + s.items.length, 0);
+  document.getElementById('st-menu').textContent = total;
+  document.getElementById('st-txt').textContent = state.contentFiles.length;
+  document.getElementById('st-img').textContent = state.assets.img.length;
+  document.getElementById('st-snd').textContent = state.assets.snd.length;
+}
+
+function updateStructTree() {
+  const el = document.getElementById('struct-tree');
+  let html = '';
+  html += `<div class="tree-item folder">📁 sys/</div>`;
+  html += `<div class="tree-item file-mnu tree-indent">📋 main.mnu</div>`;
+  state.subMenus.forEach(sm => html += `<div class="tree-item file-mnu tree-indent">📋 ${esc(sm.name)}</div>`);
+  html += `<div class="tree-item folder">📁 text/</div>`;
+  if (!state.contentFiles.length) html += `<div class="tree-item tree-indent" style="opacity:.3">📄 (খালি)</div>`;
+  state.contentFiles.forEach(cf => html += `<div class="tree-item file-txt tree-indent">📄 ${esc(cf.filename)}</div>`);
+  html += `<div class="tree-item folder">📁 img/</div>`;
+  if (!state.assets.img.length) html += `<div class="tree-item tree-indent" style="opacity:.3">🖼️ (খালি)</div>`;
+  state.assets.img.forEach(a => html += `<div class="tree-item file-img tree-indent">🖼️ ${esc(a.name)}</div>`);
+  html += `<div class="tree-item folder">📁 snd/</div>`;
+  if (!state.assets.snd.length) html += `<div class="tree-item tree-indent" style="opacity:.3">🎵 (খালি)</div>`;
+  state.assets.snd.forEach(a => html += `<div class="tree-item file-snd tree-indent">🎵 ${esc(a.name)}</div>`);
+  html += `<div class="tree-item" style="color:var(--text2);">📄 index.html</div>`;
+  html += `<div class="tree-item" style="color:var(--text2);">📄 script.js</div>`;
+  html += `<div class="tree-item" style="color:var(--text2);">📄 kaiad_config.js</div>`;
+  const manifestName = state.platform === '2.5' ? 'manifest.webapp' : 'manifest.webmanifest';
+  html += `<div class="tree-item" style="color:var(--text2);">📄 ${manifestName}</div>`;
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════
+// GENERATE FILES
+// ══════════════════════════════════════════════════
+function generateMainMnu() { return state.menuItems.map(i => `${i.title}\n${i.target}`).join('\n'); }
+function generateSubMnu(sm) { return sm.items.map(i => `${i.title}\n${i.target}`).join('\n'); }
+
+function generateSettings() {
+  const vals = {
+    bgColor: hexToRgb(document.getElementById('s-bgColor').value),
+    menuFont: hexToArgb(document.getElementById('s-menuFont').value, 200),
+    menuSel: hexToArgb(document.getElementById('s-menuSel').value),
+    textFont: hexToRgb(document.getElementById('s-textFont').value),
+    lineSpacing: document.getElementById('s-lineSpacing').value,
+    bgDim: document.getElementById('s-bgDim').value,
+    useBg: document.getElementById('s-useBgImage').value,
+    promptSound: document.getElementById('prompt-sound').value,
+    manScroll: document.getElementById('s-manScroll').value,
+    autoScroll: document.getElementById('s-autoScroll').value,
+  };
+  return [
+    vals.bgColor+' - bgColor', vals.menuFont+' - menuFontColor', vals.menuSel+' - menuSelectedSettings',
+    vals.textFont+' - textFontColor', '255,0,0,0 - scrollbarMainColor', '127,255,255,255 - scrollbarBorderColor',
+    '100,100,100 - cursorBorderColor', '0,0,0 - cursorMainColor', '255,255,255,255 - clockMainColor',
+    '255,0,0,0 - clockBorderColor', vals.lineSpacing+' - lineSpacing', vals.bgDim+' - bgImageDimLevel',
+    vals.useBg+' - useBgImage', vals.promptSound+' - promptSound',
+    vals.manScroll+' - manualScrollAmount', vals.autoScroll+' - autoScrollSpeedBase'
+  ].join('\n');
+}
+
+function generateKaiAdConfig() {
+  return `var publisherid = "${document.getElementById('publisher-id').value || 'your_publisher_id'}";\nvar appname = "${document.getElementById('app-id').value || 'your_app_name'}";\nvar slotname = "${document.getElementById('slot-name').value || 'your_slot_name'}";`;
+}
+
+function generateManifest() {
+  const name = document.getElementById('app-name').value || 'S-Book';
+  if (state.platform === '2.5') {
+    return JSON.stringify({ name, description: name+" KaiOS eBook", launch_path:"/index.html", icons:{"56":"/img/vendor_logo.png","112":"/img/vendor_logo.png"}, developer:{name:"",url:""}, default_locale:"bn", type:"web" }, null, 2);
+  } else {
+    return JSON.stringify({ name, short_name:name, description:name+" KaiOS eBook", start_url:"/index.html", display:"standalone", background_color:"#000000", theme_color:"#000000", icons:[{src:"/img/vendor_logo.png",sizes:"112x112",type:"image/png"}] }, null, 2);
+  }
+}
+
+function generateIndexHtml() {
+  const appName = document.getElementById('app-name').value || 'S-Book';
+  return `<!DOCTYPE html>
+<html>
+<head>
+    <title>${esc(appName)}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta name="theme_color" content="#000">
+    <style id="static-styles">
+        *{box-sizing:border-box;outline:0}body{font-family:sans-serif;margin:0;color:#333;display:flex;flex-direction:column;height:100vh;overflow:hidden;background-color:#000;scroll-behavior:smooth}.status-bar{padding:5px 10px;text-align:center;font-weight:bold;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;background:url('img/soft_1.png') no-repeat center/cover;color:white}.main-content{flex-grow:1;overflow-y:auto;position:relative;width:100%;word-wrap:break-word;word-break:keep-all;background-color:#000}#menu-list,#link-list-ul{list-style:none;padding:0;margin:0}#menu-list li,#link-list-ul li{padding:10px 15px;border-bottom:1px solid #555;cursor:pointer;color:#ccc}#menu-list li.selected,#link-list-ul li.selected{background-color:#fff;color:#000}#content-viewer{padding:10px;line-height:1.6;overflow-y:auto;height:100%;box-sizing:border-box;white-space:pre-wrap;color:#fff;caret-color:#000}#content-viewer p{margin:0 0 1em 0}#content-viewer img{max-width:100%;height:auto;display:block;margin:10px auto;border:1px solid #777}.softkeys{display:flex;justify-content:space-between;padding:5px;flex-shrink:0;background:url('img/soft_2.png') no-repeat center/cover}.softkeys div{flex:1;text-align:center;padding:5px 0;cursor:pointer;font-size:14px;color:white;text-shadow:-1px -1px 0 black,1px -1px 0 black,-1px 1px 0 black,1px 1px 0 black}.softkeys div:nth-child(2){font-weight:bold}.hidden{display:none!important}#link-list-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background-color:rgba(50,50,50,.95);z-index:100;display:flex;flex-direction:column}#link-list-ul{flex-grow:1;overflow-y:auto;background-color:#000}.fullscreen-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#000;z-index:200;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:white}#vendor-logo-screen img{max-width:80%;max-height:80%}#sound-confirm-screen .sound-confirm-content{padding:20px}#sound-confirm-screen .sound-confirm-content p{margin:10px 0;font-size:18px}.status-bar,.main-content,.softkeys{visibility:hidden}
+    </style>
+    <style id="dynamic-styles"></style>
+</head>
+<body>
+    <div id="vendor-logo-screen" class="fullscreen-overlay"><img src="img/vendor_logo.png" alt="Logo"></div>
+    <div id="sound-confirm-screen" class="fullscreen-overlay hidden">
+        <div class="sound-confirm-content"><p>Enable Sound?</p>
+        <table width="100%" style="position:fixed;bottom:0;left:0;background:#222;padding:2px;"><tr><td>Yes</td><td></td><td>No</td></tr></table></div>
+    </div>
+    <div id="splash-screen" class="fullscreen-overlay hidden"></div>
+    <div class="status-bar"><span id="status-title">Loading...</span></div>
+    <div class="main-content">
+        <ul id="menu-list"></ul>
+        <div id="content-viewer" class="hidden"></div>
+        <div id="link-list-overlay" class="hidden">
+            <div class="status-bar">Links</div>
+            <ul id="link-list-ul"></ul>
+        </div>
+    </div>
+    <div class="softkeys">
+        <div id="softkey-left"></div>
+        <div id="softkey-center"></div>
+        <div id="softkey-right"></div>
+    </div>
+    <script src="https://static.kaiads.com/ads-sdk/ads-sdk.v5.min.js"><\/script>
+    <script src="kaiads.v5.min.js"><\/script>
+    <script src="kaiad_config.js"><\/script>
+    <script src="script.js"><\/script>
+</body>
+</html>`;
+}
+
+function generateScript() {
+  const menuTitle = document.getElementById('menu-title').value || 'MENU';
+  const vendorTime = document.getElementById('vendor-time').value || 2000;
+  const splashTime = document.getElementById('splash-time').value || 2500;
+  const is25 = state.platform === '2.5';
+
+  const linkOpenCode = is25
+    ? `try { new MozActivity({name:"view",data:{type:"url",url:linkToOpen}}); } catch(e) { window.open(linkToOpen,'_blank'); }`
+    : `window.open(linkToOpen,'_blank');`;
+
+  const exitCode = is25
+    ? `try { window.close(); } catch(e) { console.warn("window.close() failed.",e); }`
+    : `history.back();`;
+
+  return `function scrollIntoViewPolyfill(el,options){if(!el||!el.scrollIntoView)return;var rect=el.getBoundingClientRect();var parent=el.parentNode;while(parent&&parent!==document.body&&parent.scrollHeight<=parent.clientHeight){parent=parent.parentNode;}if(!parent||!parent.scrollTo){el.scrollIntoView();return;}var parentRect=parent.getBoundingClientRect();if(options&&options.block==='center'){var scrollTop=parent.scrollTop+(rect.top+rect.bottom)/2-(parentRect.top+parentRect.bottom)/2;parent.scrollTop=scrollTop;}else{el.scrollIntoView();}}
+document.addEventListener('DOMContentLoaded',function(){
+var statusBarTitleEl=document.getElementById('status-title');
+var menuListEl=document.getElementById('menu-list');
+var contentViewerEl=document.getElementById('content-viewer');
+var softkeyLeftEl=document.getElementById('softkey-left');
+var softkeyCenterEl=document.getElementById('softkey-center');
+var softkeyRightEl=document.getElementById('softkey-right');
+var linkListOverlayEl=document.getElementById('link-list-overlay');
+var linkListUlEl=document.getElementById('link-list-ul');
+var vendorLogoScreenEl=document.getElementById('vendor-logo-screen');
+var soundConfirmScreenEl=document.getElementById('sound-confirm-screen');
+var splashScreenEl=document.getElementById('splash-screen');
+var appStatusBarEl=document.querySelector('.status-bar');
+var appMainContentEl=document.querySelector('.main-content');
+var appSoftkeysEl=document.querySelector('.softkeys');
+var BASE_SYS_PATH='sys/';var BASE_TEXT_PATH='text/';var BASE_IMG_PATH='img/';
+var APP_NAME="${menuTitle.replace(/"/g,'\\"')}";var INITIAL_MENU='main.mnu';var SETTINGS_FILE=BASE_SYS_PATH+'settings.txt';
+var VENDOR_LOGO_DURATION=${vendorTime};var SPLASH_DURATION=${splashTime};
+var currentView='menu';var currentMenuItems=[];var currentTextLinks=[];var selectedIndex=0;var historyStack=[];
+var isAutoScrolling=false;var appSettings={};var SCROLL_INTERVAL_MS=50;var scrollIntervalId=null;
+var manualScrollAmount=30;var autoScrollSpeedBase=1;
+var backgroundMusic=new Audio();var soundEnabled=false;var MUSIC_FILE_PATH='snd/music.mp3';
+var startupStep='vendorLogo';
+var settingKeys=['bgColor','menuFontColor','menuSelectedSettings','textFontColor','scrollbarMainColor','scrollbarBorderColor','cursorBorderColor','cursorMainColor','clockMainColor','clockBorderColor','lineSpacing','bgImageDimLevel','useBgImage','promptSound','manualScrollAmount','autoScrollSpeedBase'];
+function getDefaultSettings(){return{bgColor:'0,0,0',menuFontColor:'255,200,200,200',menuSelectedSettings:'255,255,255,255',textFontColor:'255,255,255',scrollbarMainColor:'255,0,0,0',scrollbarBorderColor:'127,255,255,255',cursorBorderColor:'100,100,100',cursorMainColor:'0,0,0',clockMainColor:'255,255,255,255',clockBorderColor:'255,0,0,0',lineSpacing:'2',bgImageDimLevel:'60',useBgImage:'yes',promptSound:'yes',manualScrollAmount:'30',autoScrollSpeedBase:'1'};}
+function parseColorString(colorStr,isArgb){var parts=colorStr.split(',');if(isArgb){if(parts.length===4){var a=parseInt(parts[0],10)/255;return'rgba('+parseInt(parts[1],10)+','+parseInt(parts[2],10)+','+parseInt(parts[3],10)+','+a.toFixed(3)+')';}}else{if(parts.length===3){return'rgb('+parseInt(parts[0],10)+','+parseInt(parts[1],10)+','+parseInt(parts[2],10)+')';}}return isArgb?'rgba(0,0,0,1)':'rgb(0,0,0)';}
+function getContrastColor(s){var p=s.split(',');var r=0,g=0,b=0;if(p.length===3){r=parseInt(p[0].replace('rgb(','').trim(),10);g=parseInt(p[1].trim(),10);b=parseInt(p[2].replace(')','').trim(),10);}else if(p.length===4){r=parseInt(p[1].trim(),10);g=parseInt(p[2].trim(),10);b=parseInt(p[3].replace(')','').trim(),10);}return((r*299+g*587+b*114)/1000)>128?'rgb(0,0,0)':'rgb(255,255,255)';}
+function parseSettings(c){var lines=c.split('\\n');var parsed={};var d=getDefaultSettings();for(var i=0;i<settingKeys.length;i++){var k=settingKeys[i];if(lines[i]){var v=lines[i].split('-')[0].trim();parsed[k]=v?v:d[k];}else{parsed[k]=d[k];}}return parsed;}
+function applySettings(settings){appSettings=settings;appSettings.soundChoiceMade=false;appSettings.soundEnabledByUser=false;manualScrollAmount=parseInt(appSettings.manualScrollAmount,10)||30;autoScrollSpeedBase=parseInt(appSettings.autoScrollSpeedBase,10)||1;var css="";var bgColor=parseColorString(appSettings.bgColor,false);var menuFontColor=parseColorString(appSettings.menuFontColor,true);var menuSelectedBgColor=parseColorString(appSettings.menuSelectedSettings,true);var menuSelectedFontColor=getContrastColor(appSettings.menuSelectedSettings);var textFontColor=parseColorString(appSettings.textFontColor,false);var scrollbarMain=parseColorString(appSettings.scrollbarMainColor,true);var scrollbarBorder=parseColorString(appSettings.scrollbarBorderColor,true);var cursorMain=parseColorString(appSettings.cursorMainColor,false);var clockMain=parseColorString(appSettings.clockMainColor,true);var cbp=appSettings.clockBorderColor.split(',');var cbc='transparent';if(cbp.length===4){cbc='rgba('+parseInt(cbp[1],10)+','+parseInt(cbp[2],10)+','+parseInt(cbp[3],10)+','+(parseInt(cbp[0],10)/255).toFixed(3)+')';}else if(cbp.length===3){cbc='rgb('+parseInt(cbp[0],10)+','+parseInt(cbp[1],10)+','+parseInt(cbp[2],10)+')';}var lineSpacing=(parseInt(appSettings.lineSpacing,10)||0)+'px';var useBgImg=appSettings.useBgImage.toLowerCase()==='yes';var bgDimAlpha=(parseInt(appSettings.bgImageDimLevel,10)||0)/255;css+="body{background-color:"+bgColor+"}\\n";css+=".status-bar{color:"+clockMain+";text-shadow:-1px -1px 0 "+cbc+",1px -1px 0 "+cbc+",-1px 1px 0 "+cbc+",1px 1px 0 "+cbc+"}\\n";css+=".main-content{background-color:"+bgColor+";";if(useBgImg){css+="background-image:url('img/fon.png'),linear-gradient(rgba(0,0,0,"+bgDimAlpha.toFixed(3)+"),rgba(0,0,0,"+bgDimAlpha.toFixed(3)+"));background-size:cover;background-position:center;background-blend-mode:overlay;";}css+="scrollbar-color:"+scrollbarMain+" "+scrollbarBorder+"}\\n";css+=".main-content::-webkit-scrollbar{width:10px}\\n";css+=".main-content::-webkit-scrollbar-track{background:"+scrollbarBorder+"}\\n";css+=".main-content::-webkit-scrollbar-thumb{background:"+scrollbarMain+"}\\n";css+="#menu-list li,#link-list-ul li{color:"+menuFontColor+"}\\n";css+="#menu-list li.selected,#link-list-ul li.selected{background-color:"+menuSelectedBgColor+";color:"+menuSelectedFontColor+"}\\n";css+="#content-viewer{color:"+textFontColor+";line-height:calc(1em + "+lineSpacing+");caret-color:"+cursorMain+"}\\n";css+="#link-list-ul{background-color:"+bgColor+"}\\n";var d=document.getElementById('dynamic-styles');if(d){d.innerHTML=css;}}
+function initializeApp(){vendorLogoScreenEl.classList.add('hidden');soundConfirmScreenEl.classList.add('hidden');splashScreenEl.classList.add('hidden');appStatusBarEl.style.visibility='visible';appMainContentEl.style.visibility='visible';appSoftkeysEl.style.visibility='visible';loadMnu(INITIAL_MENU,APP_NAME);if(soundEnabled){playBackgroundMusic();}startupStep='app';updateSoftkeys();}
+function showVendorLogo(){startupStep='vendorLogo';vendorLogoScreenEl.classList.remove('hidden');updateSoftkeys();setTimeout(function(){vendorLogoScreenEl.classList.add('hidden');if(appSettings.promptSound&&appSettings.promptSound.toLowerCase()==='yes'){showSoundConfirmation();}else{soundEnabled=false;appSettings.soundChoiceMade=true;appSettings.soundEnabledByUser=false;showSplashScreen();}},VENDOR_LOGO_DURATION);}
+function showSoundConfirmation(){startupStep='soundConfirm';soundConfirmScreenEl.classList.remove('hidden');updateSoftkeys();}
+function handleSoundConfirmation(enable){soundEnabled=enable;soundConfirmScreenEl.classList.add('hidden');if(appSettings.promptSound&&appSettings.promptSound.toLowerCase()==='yes'){appSettings.soundChoiceMade=true;appSettings.soundEnabledByUser=enable;}showSplashScreen();}
+function showSplashScreen(){startupStep='splash';splashScreenEl.classList.remove('hidden');splashScreenEl.style.backgroundImage="url('img/fon.png')";splashScreenEl.style.backgroundSize='cover';splashScreenEl.style.backgroundPosition='center';splashScreenEl.style.backgroundColor='black';updateSoftkeys();setTimeout(function(){splashScreenEl.classList.add('hidden');initializeApp();},SPLASH_DURATION);}
+function playBackgroundMusic(){if(soundEnabled&&MUSIC_FILE_PATH){backgroundMusic.src=MUSIC_FILE_PATH;backgroundMusic.loop=true;backgroundMusic.volume=0.5;var p=backgroundMusic.play();if(p!==undefined){p.catch(function(e){console.warn("Music autoplay prevented:",e);});}}}
+function stopBackgroundMusic(){backgroundMusic.pause();backgroundMusic.currentTime=0;}
+function loadAndApplySettings(callback){var xhr=new XMLHttpRequest();xhr.open('GET',SETTINGS_FILE,true);xhr.onreadystatechange=function(){if(xhr.readyState===4){var s;if(xhr.status===200||(xhr.status===0&&xhr.responseText)){s=parseSettings(xhr.responseText);}else{s=parseSettings("");}applySettings(s);callback();}};xhr.onerror=function(){applySettings(parseSettings(""));callback();};xhr.send();}
+function loadFile(filePath,successCallback,errorCallback){var xhr=new XMLHttpRequest();xhr.open('GET',filePath,true);xhr.onreadystatechange=function(){if(xhr.readyState===4){if(xhr.status===200||(xhr.status===0&&xhr.responseText)){successCallback(xhr.responseText);}else{var em="Load failed: "+filePath.split('/').pop();if(xhr.status!==0){em+=" ("+xhr.status+")";}errorCallback(em,filePath);}}};xhr.onerror=function(){errorCallback("Network error: "+filePath.split('/').pop(),filePath);};xhr.send();}
+function loadMnu(mnuFileName,title,restoreState){var fullPath=BASE_SYS_PATH+mnuFileName;title=title||mnuFileName;loadFile(fullPath,function(mnuContent){currentMenuItems=parseMnuContent(mnuContent);renderMenu(title);currentView='menu';menuListEl.style.display='block';contentViewerEl.style.display='none';contentViewerEl.classList.add('hidden');linkListOverlayEl.classList.add('hidden');selectedIndex=(restoreState&&typeof restoreState.selectedIndex==='number')?restoreState.selectedIndex:0;updateSelectionDisplay();var lh=historyStack.length>0?historyStack[historyStack.length-1]:null;if(!restoreState){if(!lh||lh.path!==fullPath||lh.type!=='menu'){historyStack.push({type:'menu',path:fullPath,title:title,scrollPos:0,selectedIndex:0});}else{lh.title=title;lh.selectedIndex=0;lh.scrollPos=0;}}else{if(lh&&lh.path===fullPath&&lh.type==='menu'){lh.title=title;lh.selectedIndex=selectedIndex;lh.scrollPos=restoreState.scrollPos;}}if(restoreState&&typeof restoreState.scrollPos==='number'){setTimeout(function(){menuListEl.scrollTop=restoreState.scrollPos;updateSelectionDisplay();},0);}else{menuListEl.scrollTop=0;updateSelectionDisplay();}updateSoftkeys();currentTextLinks=[];},function(em,ap){displayError(em,ap);});}
+function parseMnuContent(content){var lines=content.split('\\n').map(function(l){return l.trim();}).filter(function(l){return l;});var items=[];for(var i=0;i<lines.length;i+=2){if(lines[i]&&lines[i+1]){items.push({title:lines[i],target:lines[i+1]});}}return items;}
+function renderMenu(title){statusBarTitleEl.textContent=title||APP_NAME;menuListEl.innerHTML='';currentMenuItems.forEach(function(item,index){var li=document.createElement('li');li.textContent=item.title;li.dataset.index=index;li.addEventListener('click',function(){handleMenuItemClick(index);});menuListEl.appendChild(li);});}
+function updateSelectionDisplay(){var listEl=currentView==='menu'?menuListEl:linkListUlEl;var items=currentView==='menu'?currentMenuItems:currentTextLinks;Array.prototype.slice.call(listEl.children).forEach(function(li){li.classList.remove('selected');});if(items.length>0&&selectedIndex>=0&&selectedIndex<items.length){var sel=listEl.children[selectedIndex];if(sel){sel.classList.add('selected');setTimeout(function(){scrollIntoViewPolyfill(sel,{block:'center',inline:'nearest'});},0);}}}
+function loadTxt(txtFileName,title,restoreState){getKaiAd({publisher:publisherid,app:appname,slot:slotname,onerror:err=>console.error('Custom catch:',err),onready:ad=>{ad.call('display');}});var fullPath=BASE_TEXT_PATH+txtFileName;title=title||txtFileName;loadFile(fullPath,function(txtContent){renderTxtContent(txtContent,title);if(restoreState&&restoreState.textLinks){currentTextLinks=restoreState.textLinks.slice();}currentView='content';menuListEl.style.display='none';contentViewerEl.style.display='block';contentViewerEl.classList.remove('hidden');linkListOverlayEl.classList.add('hidden');stopAutoScroll();var lh=historyStack.length>0?historyStack[historyStack.length-1]:null;if(!restoreState){if(!lh||lh.path!==fullPath||lh.type!=='text'){historyStack.push({type:'text',path:fullPath,title:title,scrollPos:0,textLinks:currentTextLinks.slice()});}else{lh.title=title;lh.textLinks=currentTextLinks.slice();lh.scrollPos=0;}}else{if(lh&&lh.path===fullPath&&lh.type==='text'){lh.title=title;lh.textLinks=currentTextLinks.slice();lh.scrollPos=restoreState.scrollPos;}}if(restoreState&&typeof restoreState.scrollPos==='number'){setTimeout(function(){contentViewerEl.scrollTop=restoreState.scrollPos;},0);}else{contentViewerEl.scrollTop=0;}updateSoftkeys();},function(em,ap){displayError(em,ap);});}
+function renderTxtContent(content,fileTitle){statusBarTitleEl.textContent=fileTitle;contentViewerEl.innerHTML='';currentTextLinks=[];var lines=content.split('\\n');var inLinkBlock=false;var linkTitle='',linkUrl='';var p=document.createElement('p');var textBuffer="";function flushTextBuffer(){if(textBuffer.length>0){p.appendChild(document.createTextNode(textBuffer));contentViewerEl.appendChild(p);p=document.createElement('p');textBuffer="";}}for(var i=0;i<lines.length;i++){var line=lines[i];var trimmedLine=line.trim();if(trimmedLine==='###'){flushTextBuffer();if(inLinkBlock){if(linkTitle&&linkUrl){currentTextLinks.push({title:linkTitle,url:linkUrl});}linkTitle='';linkUrl='';}inLinkBlock=!inLinkBlock;continue;}if(inLinkBlock){if(!linkTitle)linkTitle=trimmedLine;else if(!linkUrl)linkUrl=trimmedLine;continue;}if(trimmedLine.indexOf('[IMG]')===0){flushTextBuffer();if(lines[i+1]){var imgFileName=lines[i+1].trim();if(imgFileName){var img=document.createElement('img');img.src=BASE_IMG_PATH+imgFileName;img.alt=imgFileName;img.onerror=function(){this.alt="Failed: "+this.src.split('/').pop();};contentViewerEl.appendChild(img);i++;}}else{textBuffer+=line+'\\n';}}flushTextBuffer();}
+function showLinkList(){if(currentTextLinks.length===0)return;var lh=historyStack[historyStack.length-1];if(lh&&(lh.type==='content'||lh.type==='text')){lh.scrollPos=contentViewerEl.scrollTop;}currentView='link-list';linkListOverlayEl.classList.remove('hidden');linkListUlEl.innerHTML='';currentTextLinks.forEach(function(link,index){var li=document.createElement('li');li.textContent=link.title;li.dataset.index=index;li.addEventListener('click',function(){handleLinkListItemClick(index);});linkListUlEl.appendChild(li);});selectedIndex=0;updateSelectionDisplay();updateSoftkeys();linkListUlEl.focus();}
+function hideLinkList(){linkListOverlayEl.classList.add('hidden');currentView='content';updateSoftkeys();contentViewerEl.focus();var lh=historyStack[historyStack.length-1];if(lh&&(lh.type==='content'||lh.type==='text')&&typeof lh.scrollPos==='number'){setTimeout(function(){contentViewerEl.scrollTop=lh.scrollPos;},0);}}
+function handleLinkListItemClick(index){selectedIndex=index;updateSelectionDisplay();handleCenterKey();}
+function startAutoScroll(){if(scrollIntervalId)clearInterval(scrollIntervalId);isAutoScrolling=true;scrollIntervalId=setInterval(function(){contentViewerEl.scrollTop+=autoScrollSpeedBase;if(contentViewerEl.scrollTop>=(contentViewerEl.scrollHeight-contentViewerEl.clientHeight)){stopAutoScroll();}},SCROLL_INTERVAL_MS);updateSoftkeys();}
+function stopAutoScroll(){if(scrollIntervalId)clearInterval(scrollIntervalId);scrollIntervalId=null;isAutoScrolling=false;updateSoftkeys();}
+function toggleAutoScroll(){if(isAutoScrolling){stopAutoScroll();}else{startAutoScroll();}}
+function handleKeyDown(e){if(startupStep==='vendorLogo'){e.preventDefault();return;}if(startupStep==='soundConfirm'){switch(e.key){case'SoftLeft':case'F1':handleSoundConfirmation(true);e.preventDefault();break;case'SoftRight':case'F2':handleSoundConfirmation(false);e.preventDefault();break;case'Enter':case'Accept':handleSoundConfirmation(true);e.preventDefault();break;}return;}if(startupStep==='splash'){e.preventDefault();return;}switch(e.key){case'ArrowUp':case'Up':navigateItem(-1);e.preventDefault();break;case'ArrowDown':case'Down':navigateItem(1);e.preventDefault();break;case'ArrowLeft':case'Left':if(currentView==='content'&&!isAutoScrolling){contentViewerEl.scrollTop=Math.max(0,contentViewerEl.scrollTop-contentViewerEl.clientHeight);e.preventDefault();}break;case'ArrowRight':case'Right':if(currentView==='content'&&!isAutoScrolling){contentViewerEl.scrollTop+=contentViewerEl.clientHeight;e.preventDefault();}break;case'Enter':case'Accept':handleCenterKey();e.preventDefault();break;case'SoftLeft':case'F1':handleSoftLeftKey();e.preventDefault();break;case'SoftRight':case'F2':handleSoftRightKey();e.preventDefault();break;case'Backspace':if(currentView!=='menu'||(historyStack.length>1)){handleSoftRightKey();e.preventDefault();}break;case'1':if(currentView==='content'&&!isAutoScrolling)contentViewerEl.scrollTop=0;break;case'2':if(currentView==='content'&&!isAutoScrolling)contentViewerEl.scrollTop-=(manualScrollAmount*2);break;case'3':if(currentView==='content'&&!isAutoScrolling)contentViewerEl.scrollTop=Math.max(0,contentViewerEl.scrollHeight-contentViewerEl.clientHeight);break;case'4':if(currentView==='content'&&isAutoScrolling)autoScrollSpeedBase=Math.max(1,autoScrollSpeedBase-1);break;case'5':if(currentView==='content')toggleAutoScroll();break;case'6':if(currentView==='content'&&isAutoScrolling)autoScrollSpeedBase+=1;break;case'8':if(currentView==='content'&&!isAutoScrolling)contentViewerEl.scrollTop+=(manualScrollAmount*2);break;}}
+function navigateItem(direction){var listEl,items;if(currentView==='menu'){listEl=menuListEl;items=currentMenuItems;}else if(currentView==='link-list'){listEl=linkListUlEl;items=currentTextLinks;}else if(currentView==='content'){if(!isAutoScrolling){contentViewerEl.scrollTop+=direction*manualScrollAmount;}else{autoScrollSpeedBase=Math.max(1,autoScrollSpeedBase+direction);}return;}else{return;}if(items.length>0){selectedIndex=(selectedIndex+direction+items.length)%items.length;updateSelectionDisplay();}}
+function handleMenuItemClick(index){selectedIndex=index;updateSelectionDisplay();handleCenterKey();}
+function handleCenterKey(){if(startupStep==='soundConfirm'){handleSoundConfirmation(true);return;}if(startupStep!=='app')return;if(currentView==='menu'&&currentMenuItems.length>0&&selectedIndex<currentMenuItems.length){var si=currentMenuItems[selectedIndex];var lh=historyStack[historyStack.length-1];if(lh&&lh.type==='menu'){lh.scrollPos=menuListEl.scrollTop;lh.selectedIndex=selectedIndex;}if(si.target.toLowerCase().indexOf('.mnu')!==-1){loadMnu(si.target,si.title);}else if(si.target.toLowerCase().indexOf('.txt')!==-1){loadTxt(si.target,si.title);}else if(si.target==='[EXIT]'){exitApp();}}else if(currentView==='content'){toggleAutoScroll();}else if(currentView==='link-list'&&currentTextLinks.length>0&&selectedIndex<currentTextLinks.length){var linkToOpen=currentTextLinks[selectedIndex].url;var ok=true;if(appSettings.promptSound&&appSettings.promptSound.toLowerCase()==='yes'){if(!(appSettings.soundChoiceMade&&!appSettings.soundEnabledByUser)){ok=window.confirm("Open link: "+currentTextLinks[selectedIndex].title+"?");}}if(ok){${linkOpenCode}}}}
+function handleSoftLeftKey(){if(startupStep==='soundConfirm'){handleSoundConfirmation(true);return;}if(startupStep!=='app')return;if(currentView==='content'&&currentTextLinks.length>0){showLinkList();}}
+function handleSoftRightKey(){if(startupStep==='soundConfirm'){handleSoundConfirmation(false);return;}if(startupStep!=='app')return;stopAutoScroll();if(currentView==='link-list'){hideLinkList();return;}if(historyStack.length>1){var C=historyStack.pop();var B=historyStack[historyStack.length-1];while(B.type==='error'&&historyStack.length>1){historyStack.pop();B=historyStack[historyStack.length-1];}if(B.type==='menu'){loadMnu(B.path.replace(BASE_SYS_PATH,''),B.title,{selectedIndex:B.selectedIndex,scrollPos:B.scrollPos});}else if(B.type==='text'){loadTxt(B.path.replace(BASE_TEXT_PATH,''),B.title,{scrollPos:B.scrollPos,textLinks:B.textLinks?B.textLinks.slice():[]});}else{loadMnu(INITIAL_MENU,APP_NAME);historyStack=[{type:'menu',path:BASE_SYS_PATH+INITIAL_MENU,title:APP_NAME,scrollPos:0,selectedIndex:0}];}}else{exitApp();}}
+function updateSoftkeys(){softkeyLeftEl.textContent='';softkeyCenterEl.textContent='';softkeyRightEl.textContent='';if(startupStep==='vendorLogo'||startupStep==='splash'){return;}if(startupStep==='soundConfirm'){softkeyLeftEl.textContent='YES';softkeyRightEl.textContent='NO';return;}if(currentView==='menu'){softkeyCenterEl.textContent=currentMenuItems.length>0?'SELECT':'';var isInit=historyStack.length===1&&historyStack[0].path===(BASE_SYS_PATH+INITIAL_MENU);softkeyRightEl.textContent=(historyStack.length<=1&&isInit)?'EXIT':'BACK';}else if(currentView==='content'){softkeyLeftEl.textContent=currentTextLinks.length>0?'LINKS':'';softkeyCenterEl.textContent=isAutoScrolling?'PAUSE':'SCROLL';softkeyRightEl.textContent='BACK';}else if(currentView==='link-list'){softkeyCenterEl.textContent=currentTextLinks.length>0?'OPEN':'';softkeyRightEl.textContent='CLOSE';}else if(currentView==='error'){softkeyRightEl.textContent=historyStack.length>1?'BACK':'EXIT';}}
+function displayError(message,failedPathContext){statusBarTitleEl.textContent="Error";contentViewerEl.innerHTML='<p style="color:red;text-align:center;padding:20px;">'+message+'</p>';menuListEl.style.display='none';contentViewerEl.style.display='block';contentViewerEl.classList.remove('hidden');linkListOverlayEl.classList.add('hidden');currentView='error';currentTextLinks=[];stopAutoScroll();historyStack.push({type:'error',path:'',title:'Error: '+message,scrollPos:0,failedPath:failedPathContext||''});updateSoftkeys();}
+function exitApp(){getKaiAd({publisher:publisherid,app:appname,slot:slotname,onerror:err=>console.error('Custom catch:',err),onready:ad=>{ad.call('display');}});var ok=true;if(appSettings.promptSound&&appSettings.promptSound.toLowerCase()==='yes'){ok=confirm('Sure to Exit ?');}if(ok){stopBackgroundMusic();${exitCode}}}
+window.addEventListener('keydown',handleKeyDown);
+softkeyLeftEl.addEventListener('click',handleSoftLeftKey);
+softkeyCenterEl.addEventListener('click',handleCenterKey);
+softkeyRightEl.addEventListener('click',handleSoftRightKey);
+loadAndApplySettings(showVendorLogo);
+getKaiAd({publisher:publisherid,app:appname,slot:slotname,onerror:err=>console.error('Custom catch:',err),onready:ad=>{ad.call('display');}});
+});`;
+}
+
+// ══════════════════════════════════════════════════
+// EXPORT ZIP
+// ══════════════════════════════════════════════════
+async function exportZip() {
+  const progressBar = document.getElementById('export-progress');
+  const progressFill = document.getElementById('export-fill');
+  progressBar.style.display = 'block';
+  progressFill.style.width = '5%';
+
+  try {
+    const zip = new JSZip();
+
+    // sys/
+    const sysF = zip.folder('sys');
+    sysF.file('main.mnu', generateMainMnu());
+    state.subMenus.forEach(sm => sysF.file(sm.name, generateSubMnu(sm)));
+    sysF.file('settings.txt', generateSettings());
+    progressFill.style.width = '25%';
+
+    // text/
+    const textF = zip.folder('text');
+    state.contentFiles.forEach(cf => textF.file(cf.filename, cf.content));
+    progressFill.style.width = '45%';
+
+    // img/
+    const imgF = zip.folder('img');
+    for (const a of state.assets.img) {
+      imgF.file(a.name, a.data.split(',')[1], { base64: true });
+    }
+    progressFill.style.width = '60%';
+
+    // snd/
+    const sndF = zip.folder('snd');
+    for (const a of state.assets.snd) {
+      sndF.file(a.name, a.data.split(',')[1], { base64: true });
+    }
+    progressFill.style.width = '75%';
+
+    // Root files
+    zip.file('index.html', generateIndexHtml());
+    zip.file('script.js', generateScript());
+    zip.file('kaiad_config.js', generateKaiAdConfig());
+    const manifestName = state.platform === '2.5' ? 'manifest.webapp' : 'manifest.webmanifest';
+    zip.file(manifestName, generateManifest());
+    zip.file('kaiads.v5.min.js', '// Place your KaiAds SDK file here (kaiads.v5.min.js)');
+
+    const appName = document.getElementById('app-name').value || 'sbook';
+    zip.file('README.txt', `S-Book App - Platform: KaiOS ${state.platform}
+=============================================
+ফাইল কাঠামো:
+sys/main.mnu     — মূল মেনু
+sys/settings.txt — রঙ ও সেটিং
+text/*.txt       — বইয়ের কন্টেন্ট
+img/             — ছবিসমূহ
+snd/music.mp3    — ব্যাকগ্রাউন্ড মিউজিক
+index.html       — মূল HTML
+script.js        — অ্যাপ লজিক
+
+প্রয়োজনীয় img/ ফাইল:
+  fon.png, soft_1.png, soft_2.png, vendor_logo.png
+
+kaiads.v5.min.js → KaiAds থেকে ডাউনলোড করুন
+`);
+    progressFill.style.width = '90%';
+
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    progressFill.style.width = '100%';
+
+    const safeName = appName.replace(/[^\w\u0980-\u09FF]/g, '_');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${safeName}_kaios${state.platform.replace('.','')}_app.zip`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+
+    showToast('🎉 ZIP ডাউনলোড শুরু!');
+    setTimeout(() => { progressBar.style.display = 'none'; progressFill.style.width = '0%'; }, 2000);
+  } catch (err) {
+    showToast('সমস্যা: ' + err.message, 'error');
+    progressBar.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// MISC
+// ══════════════════════════════════════════════════
+function resetApp() {
+  if (!confirm('সব ডেটা মুছে নতুন শুরু করবেন?')) return;
+  state.menuItems = []; state.subMenus = []; state.contentFiles = [];
+  state.assets = { img: [], snd: [] }; state.editingFileId = null;
+  _uid = 0;
+  renderMenuBuilder(); renderContentFilesList();
+  renderAssetList('img'); renderAssetList('snd');
+  updateStats(); updateStructTree(); updatePreview();
+  closeEditor();
+  showToast('রিসেট সম্পন্ন!');
+}
+
+function showPreview() { showToast('প্রিভিউ ডানদিকে দেখুন 📱'); }
+
+// Drag zone highlight
+['img-drop','snd-drop'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dragover'); });
+  el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+  el.addEventListener('drop', () => el.classList.remove('dragover'));
+});
+
+// ── INIT ──
+renderMenuBuilder();
+renderContentFilesList();
+updateStats();
+updateStructTree();
+updatePreview();
+renderPlatformInfo();
+</script>
+</body>
+</html>
