@@ -14,3 +14,4 @@ yes-Use background image (yes/no, path is fixed to img/fon.png)
 yes-Prompt for confirmation for sound/links/exit (yes/no)
 30-Manual scroll speed (pixels per Up/Down key press in content view)
 1-Default autoscroll speed (pixels per scroll interval)
+yes - enableTranslator
