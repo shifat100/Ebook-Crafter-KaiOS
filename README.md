@@ -262,6 +262,10 @@ yes                       - Prompt for sound at startup (yes/no)
 # 16. autoScrollSpeedBase: Base speed for auto-scrolling (pixels per interval). Can be adjusted with 4/6 keys.
 #     Format: Number
 1                         - Auto-scroll speed base (pixels per tick, e.g., 1)
+
+# 17. enableTranslator: Whether to enable the language translator feature in the app.
+#     Format: yes or no
+yes                       - Enable language translator feature (yes/no)
 ```
 
 **How to use color values:**
