@@ -70,11 +70,127 @@ document.addEventListener('DOMContentLoaded', function () {
     var vendorLogoTimerId = null;
     var splashTimerId = null;
 
+    // --- TRANSLATOR SETTINGS & LANGUAGES ---
+    var selectedTargetLang = 'original'; // Default to original language
+    var LANGUAGES = [
+    { name: "Original", code: "original" },
+    { name: "Afrikaans", code: "af" },
+    { name: "Albanian", code: "sq" },
+    { name: "Amharic", code: "am" },
+    { name: "Arabic", code: "ar" },
+    { name: "Armenian", code: "hy" },
+    { name: "Azerbaijani", code: "az" },
+    { name: "Basque", code: "eu" },
+    { name: "Belarusian", code: "be" },
+    { name: "Bengali", code: "bn" },
+    { name: "Bosnian", code: "bs" },
+    { name: "Bulgarian", code: "bg" },
+    { name: "Catalan", code: "ca" },
+    { name: "Cebuano", code: "ceb" },
+    { name: "Chinese (Simplified)", code: "zh-CN" },
+    { name: "Chinese (Traditional)", code: "zh-TW" },
+    { name: "Corsican", code: "co" },
+    { name: "Croatian", code: "hr" },
+    { name: "Czech", code: "cs" },
+    { name: "Danish", code: "da" },
+    { name: "Dutch", code: "nl" },
+    { name: "English", code: "en" },
+    { name: "Esperanto", code: "eo" },
+    { name: "Estonian", code: "et" },
+    { name: "Finnish", code: "fi" },
+    { name: "French", code: "fr" },
+    { name: "Frisian", code: "fy" },
+    { name: "Galician", code: "gl" },
+    { name: "Georgian", code: "ka" },
+    { name: "German", code: "de" },
+    { name: "Greek", code: "el" },
+    { name: "Gujarati", code: "gu" },
+    { name: "Haitian Creole", code: "ht" },
+    { name: "Hausa", code: "ha" },
+    { name: "Hawaiian", code: "haw" },
+    { name: "Hebrew", code: "he" },
+    { name: "Hindi", code: "hi" },
+    { name: "Hmong", code: "hmn" },
+    { name: "Hungarian", code: "hu" },
+    { name: "Icelandic", code: "is" },
+    { name: "Igbo", code: "ig" },
+    { name: "Indonesian", code: "id" },
+    { name: "Irish", code: "ga" },
+    { name: "Italian", code: "it" },
+    { name: "Japanese", code: "ja" },
+    { name: "Javanese", code: "jw" },
+    { name: "Kannada", code: "kn" },
+    { name: "Kazakh", code: "kk" },
+    { name: "Khmer", code: "km" },
+    { name: "Kinyarwanda", code: "rw" },
+    { name: "Korean", code: "ko" },
+    { name: "Kurdish", code: "ku" },
+    { name: "Kyrgyz", code: "ky" },
+    { name: "Lao", code: "lo" },
+    { name: "Latin", code: "la" },
+    { name: "Latvian", code: "lv" },
+    { name: "Lithuanian", code: "lt" },
+    { name: "Luxembourgish", code: "lb" },
+    { name: "Macedonian", code: "mk" },
+    { name: "Malagasy", code: "mg" },
+    { name: "Malay", code: "ms" },
+    { name: "Malayalam", code: "ml" },
+    { name: "Maltese", code: "mt" },
+    { name: "Maori", code: "mi" },
+    { name: "Marathi", code: "mr" },
+    { name: "Mongolian", code: "mn" },
+    { name: "Myanmar (Burmese)", code: "my" },
+    { name: "Nepali", code: "ne" },
+    { name: "Norwegian", code: "no" },
+    { name: "Nyanja (Chichewa)", code: "ny" },
+    { name: "Odia (Oriya)", code: "or" },
+    { name: "Pashto", code: "ps" },
+    { name: "Persian", code: "fa" },
+    { name: "Polish", code: "pl" },
+    { name: "Portuguese", code: "pt" },
+    { name: "Punjabi", code: "pa" },
+    { name: "Romanian", code: "ro" },
+    { name: "Russian", code: "ru" },
+    { name: "Samoan", code: "sm" },
+    { name: "Scots Gaelic", code: "gd" },
+    { name: "Serbian", code: "sr" },
+    { name: "Sesotho", code: "st" },
+    { name: "Shona", code: "sn" },
+    { name: "Sindhi", code: "sd" },
+    { name: "Sinhala", code: "si" },
+    { name: "Slovak", code: "sk" },
+    { name: "Slovenian", code: "sl" },
+    { name: "Somali", code: "so" },
+    { name: "Spanish", code: "es" },
+    { name: "Sundanese", code: "su" },
+    { name: "Swahili", code: "sw" },
+    { name: "Swedish", code: "sv" },
+    { name: "Tagalog (Filipino)", code: "tl" },
+    { name: "Tajik", code: "tg" },
+    { name: "Tamil", code: "ta" },
+    { name: "Tatar", code: "tt" },
+    { name: "Telugu", code: "te" },
+    { name: "Thai", code: "th" },
+    { name: "Turkish", code: "tr" },
+    { name: "Turkmen", code: "tk" },
+    { name: "Ukrainian", code: "uk" },
+    { name: "Urdu", code: "ur" },
+    { name: "Uyghur", code: "ug" },
+    { name: "Uzbek", code: "uz" },
+    { name: "Vietnamese", code: "vi" },
+    { name: "Welsh", code: "cy" },
+    { name: "Xhosa", code: "xh" },
+    { name: "Yiddish", code: "yi" },
+    { name: "Yoruba", code: "yo" },
+    { name: "Zulu", code: "zu" }
+];
+
     var settingKeys = [
         'bgColor', 'menuFontColor', 'menuSelectedSettings', 'textFontColor',
         'scrollbarMainColor', 'scrollbarBorderColor', 'cursorBorderColor', 'cursorMainColor',
         'clockMainColor', 'clockBorderColor', 'lineSpacing', 'bgImageDimLevel',
-        'useBgImage', 'promptSound', 'manualScrollAmount', 'autoScrollSpeedBase'
+        'useBgImage', 'promptSound', 'manualScrollAmount', 'autoScrollSpeedBase',
+        'enableTranslator' // Added Translator Toggle Setting
     ];
 
     function getDefaultSettings() {
@@ -83,7 +199,8 @@ document.addEventListener('DOMContentLoaded', function () {
             textFontColor: '255,255,255', scrollbarMainColor: '255,0,0,0', scrollbarBorderColor: '127,255,255,255',
             cursorBorderColor: '100,100,100', cursorMainColor: '0,0,0', clockMainColor: '255,255,255,255',
             clockBorderColor: '255,0,0,0', lineSpacing: '2', bgImageDimLevel: '60',
-            useBgImage: 'yes', promptSound: 'yes', manualScrollAmount: '30', autoScrollSpeedBase: '1'
+            useBgImage: 'yes', promptSound: 'yes', manualScrollAmount: '30', autoScrollSpeedBase: '1',
+            enableTranslator: 'yes' // Default ON
         };
     }
 
@@ -305,11 +422,29 @@ document.addEventListener('DOMContentLoaded', function () {
         xhr.send();
     }
 
+    function getSelectedLangName() {
+        for (var i = 0; i < LANGUAGES.length; i++) {
+            if (LANGUAGES[i].code === selectedTargetLang) {
+                return LANGUAGES[i].name;
+            }
+        }
+        return "Original";
+    }
+
     function loadMnu(mnuFileName, title, restoreState) {
         var fullPath = BASE_SYS_PATH + mnuFileName;
         title = title || mnuFileName;
         loadFile(fullPath, function (mnuContent) {
             currentMenuItems = parseMnuContent(mnuContent);
+
+            // Insert Translator Language selection menu at the top of the initial menu if enabled
+            if (mnuFileName === INITIAL_MENU && appSettings.enableTranslator && appSettings.enableTranslator.toLowerCase() === 'yes') {
+                currentMenuItems.unshift({
+                    title: "Lang: " + getSelectedLangName(),
+                    target: "[LANGUAGE_SELECT]"
+                });
+            }
+
             renderMenu(title);
             currentView = 'menu';
             menuListEl.style.display = 'block';
@@ -369,9 +504,39 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function showLanguageSelection() {
+        currentView = 'language-select';
+        statusBarTitleEl.textContent = "Select Language";
+        menuListEl.innerHTML = '';
+        LANGUAGES.forEach(function (lang, index) {
+            var li = document.createElement('li');
+            var isSelected = (lang.code === selectedTargetLang);
+            li.textContent = lang.name + (isSelected ? " ✓" : "");
+            li.dataset.index = index;
+            li.addEventListener('click', function () { selectLanguage(index); });
+            menuListEl.appendChild(li);
+        });
+        selectedIndex = 0;
+        updateSelectionDisplay();
+        updateSoftkeys();
+    }
+
+    function selectLanguage(index) {
+        var targetLang = LANGUAGES[index];
+        if (targetLang.code !== 'original') {
+            if (!navigator.onLine) {
+                alert("Translation requires an active Internet connection. Please connect to the internet to read in " + targetLang.name + ".");
+                return;
+            }
+        }
+        selectedTargetLang = targetLang.code;
+        // Reload main menu to reflect selected language
+        loadMnu(INITIAL_MENU, APP_NAME);
+    }
+
     function updateSelectionDisplay() {
-        var listEl = currentView === 'menu' ? menuListEl : linkListUlEl;
-        var items = currentView === 'menu' ? currentMenuItems : currentTextLinks;
+        var listEl = (currentView === 'menu' || currentView === 'language-select') ? menuListEl : linkListUlEl;
+        var items = (currentView === 'menu') ? currentMenuItems : (currentView === 'language-select' ? LANGUAGES : currentTextLinks);
         var childrenArray = Array.prototype.slice.call(listEl.children);
         childrenArray.forEach(function (li) { li.classList.remove('selected'); });
         if (items.length > 0 && selectedIndex >= 0 && selectedIndex < items.length) {
@@ -379,24 +544,111 @@ document.addEventListener('DOMContentLoaded', function () {
             if (selectedLi) {
                 selectedLi.classList.add('selected');
                 setTimeout(function () {
-
                     scrollIntoViewPolyfill(selectedLi, { block: 'center', inline: 'nearest' });
-
                 }, 0);
             }
         }
     }
 
-    function loadTxt(txtFileName, title, restoreState) {
-        getKaiAd({
-            publisher: publisherid,
-            app: appname,
-            slot: slotname,
-            onerror: err => console.error('Custom catch:', err),
-            onready: ad => {
-                ad.call('display');
+    // --- TRANSLATOR API CALL ---
+    function translateText(text, targetLang, callback) {
+        if (!text || !text.trim()) {
+            callback(text);
+            return;
+        }
+        if (!navigator.onLine) {
+            callback(text);
+            return;
+        }
+        var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" + encodeURIComponent(targetLang) + "&dt=t&q=" + encodeURIComponent(text);
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || (xhr.status === 0 && xhr.responseText)) {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        var translatedStr = "";
+                        if (res && res[0]) {
+                            for (var i = 0; i < res[0].length; i++) {
+                                if (res[0][i][0]) {
+                                    translatedStr += res[0][i][0];
+                                }
+                            }
+                        }
+                        callback(translatedStr || text);
+                    } catch (e) {
+                        console.error("Translation parse error:", e);
+                        callback(text);
+                    }
+                } else {
+                    callback(text);
+                }
             }
-        });
+        };
+        xhr.onerror = function () {
+            callback(text);
+        };
+        xhr.send();
+    }
+
+    // Real-time visible content translation on scroll
+    function checkAndTranslateVisible() {
+        if (selectedTargetLang === 'original') return;
+
+        if (!navigator.onLine) {
+            if (!window.offlineTranslationAlertShown) {
+                alert("Internet connection lost. Translation is disabled until connected.");
+                window.offlineTranslationAlertShown = true;
+            }
+            return;
+        } else {
+            window.offlineTranslationAlertShown = false;
+        }
+
+        var paragraphs = contentViewerEl.getElementsByTagName('p');
+        var viewerTop = contentViewerEl.scrollTop;
+        var viewerBottom = viewerTop + contentViewerEl.clientHeight + 250; // Buffer zone for smooth scrolling
+
+        for (var i = 0; i < paragraphs.length; i++) {
+            var p = paragraphs[i];
+            var pTop = p.offsetTop;
+            var pBottom = pTop + p.offsetHeight;
+
+            // Check if paragraph is currently visible in viewport
+            if (pBottom >= viewerTop - 100 && pTop <= viewerBottom) {
+                if (!p.dataset.translatedState) {
+                    p.dataset.translatedState = 'pending';
+                    var originalText = p.getAttribute('data-original-text');
+                    if (originalText && originalText.trim()) {
+                        (function (paraElement) {
+                            translateText(originalText, selectedTargetLang, function (translatedResult) {
+                                paraElement.textContent = translatedResult;
+                                paraElement.dataset.translatedState = 'done';
+                            });
+                        })(p);
+                    }
+                }
+            }
+        }
+    }
+
+    function loadTxt(txtFileName, title, restoreState) {
+        if (typeof getKaiAd === 'function') {
+            getKaiAd({
+                publisher: typeof publisherid !== 'undefined' ? publisherid : '',
+                app: typeof appname !== 'undefined' ? appname : '',
+                slot: typeof slotname !== 'undefined' ? slotname : '',
+                onerror: function(err) { console.error('Custom catch:', err); },
+                onready: function(ad) { ad.call('display'); }
+            });
+        }
+
+        // Check Internet connection if non-original language is selected
+        if (selectedTargetLang !== 'original' && !navigator.onLine) {
+            alert("No Internet Connection! Translation requires an active internet connection. Please connect or switch to Original Language.");
+        }
+
         var fullPath = BASE_TEXT_PATH + txtFileName;
         title = title || txtFileName;
         loadFile(fullPath, function (txtContent) {
@@ -426,8 +678,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
             if (restoreState && typeof restoreState.scrollPos === 'number') {
-                setTimeout(function () { contentViewerEl.scrollTop = restoreState.scrollPos; }, 0);
-            } else { contentViewerEl.scrollTop = 0; }
+                setTimeout(function () {
+                    contentViewerEl.scrollTop = restoreState.scrollPos;
+                    checkAndTranslateVisible();
+                }, 0);
+            } else {
+                contentViewerEl.scrollTop = 0;
+                checkAndTranslateVisible();
+            }
             updateSoftkeys();
         }, function (errorMessage, attemptedPath) { displayError(errorMessage, attemptedPath); });
     }
@@ -438,13 +696,16 @@ document.addEventListener('DOMContentLoaded', function () {
         var lines = content.split('\n');
         var inLinkBlock = false; var linkTitle = '', linkUrl = '';
         var p = document.createElement('p'); var textBuffer = "";
+
         function flushTextBuffer() {
             if (textBuffer.length > 0) {
-                p.appendChild(document.createTextNode(textBuffer));
+                p.textContent = textBuffer;
+                p.setAttribute('data-original-text', textBuffer); // Store original text for translation
                 contentViewerEl.appendChild(p);
                 p = document.createElement('p'); textBuffer = "";
             }
         }
+
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i]; var trimmedLine = line.trim();
             if (trimmedLine === '###') {
@@ -471,6 +732,10 @@ document.addEventListener('DOMContentLoaded', function () {
             } else { textBuffer += line + '\n'; }
         }
         flushTextBuffer();
+
+        // Attach scroll listener for dynamic real-time segment translation
+        contentViewerEl.removeEventListener('scroll', checkAndTranslateVisible);
+        contentViewerEl.addEventListener('scroll', checkAndTranslateVisible);
     }
 
     function showLinkList() {
@@ -505,6 +770,7 @@ document.addEventListener('DOMContentLoaded', function () {
         isAutoScrolling = true;
         scrollIntervalId = setInterval(function () {
             contentViewerEl.scrollTop += autoScrollSpeedBase;
+            checkAndTranslateVisible(); // Check and translate visible segments during auto scroll
             if (contentViewerEl.scrollTop >= (contentViewerEl.scrollHeight - contentViewerEl.clientHeight)) {
                 stopAutoScroll();
             }
@@ -537,16 +803,17 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'ArrowLeft': case 'Left':
                 if (currentView === 'content' && !isAutoScrolling) {
                     contentViewerEl.scrollTop = Math.max(0, contentViewerEl.scrollTop - contentViewerEl.clientHeight);
+                    checkAndTranslateVisible();
                     e.preventDefault();
                 }
                 break;
             case 'ArrowRight': case 'Right':
                 if (currentView === 'content' && !isAutoScrolling) {
                     contentViewerEl.scrollTop += contentViewerEl.clientHeight;
-
                     if (contentViewerEl.scrollTop > (contentViewerEl.scrollHeight - contentViewerEl.clientHeight)) {
                         contentViewerEl.scrollTop = contentViewerEl.scrollHeight - contentViewerEl.clientHeight;
                     }
+                    checkAndTranslateVisible();
                     e.preventDefault();
                 }
                 break;
@@ -560,23 +827,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     handleSoftRightKey(); e.preventDefault();
                 }
                 break;
-            case '1': if (currentView === 'content' && !isAutoScrolling) contentViewerEl.scrollTop = 0; break;
-            case '2': if (currentView === 'content' && !isAutoScrolling) contentViewerEl.scrollTop -= (manualScrollAmount * 2); break;
-            case '3': if (currentView === 'content' && !isAutoScrolling) contentViewerEl.scrollTop = Math.max(0, contentViewerEl.scrollHeight - contentViewerEl.clientHeight); break;
+            case '1': if (currentView === 'content' && !isAutoScrolling) { contentViewerEl.scrollTop = 0; checkAndTranslateVisible(); } break;
+            case '2': if (currentView === 'content' && !isAutoScrolling) { contentViewerEl.scrollTop -= (manualScrollAmount * 2); checkAndTranslateVisible(); } break;
+            case '3': if (currentView === 'content' && !isAutoScrolling) { contentViewerEl.scrollTop = Math.max(0, contentViewerEl.scrollHeight - contentViewerEl.clientHeight); checkAndTranslateVisible(); } break;
             case '4': if (currentView === 'content' && isAutoScrolling) autoScrollSpeedBase = Math.max(1, autoScrollSpeedBase - 1); break;
             case '5': if (currentView === 'content') toggleAutoScroll(); break;
             case '6': if (currentView === 'content' && isAutoScrolling) autoScrollSpeedBase += 1; break;
-            case '8': if (currentView === 'content' && !isAutoScrolling) contentViewerEl.scrollTop += (manualScrollAmount * 2); break;
+            case '8': if (currentView === 'content' && !isAutoScrolling) { contentViewerEl.scrollTop += (manualScrollAmount * 2); checkAndTranslateVisible(); } break;
         }
     }
 
     function navigateItem(direction) {
         var listEl, items;
         if (currentView === 'menu') { listEl = menuListEl; items = currentMenuItems; }
+        else if (currentView === 'language-select') { listEl = menuListEl; items = LANGUAGES; }
         else if (currentView === 'link-list') { listEl = linkListUlEl; items = currentTextLinks; }
         else if (currentView === 'content') {
             if (!isAutoScrolling) {
                 contentViewerEl.scrollTop += direction * manualScrollAmount;
+                checkAndTranslateVisible();
             } else {
                 autoScrollSpeedBase = Math.max(1, autoScrollSpeedBase + direction);
             }
@@ -600,12 +869,21 @@ document.addEventListener('DOMContentLoaded', function () {
             var lastHistory = historyStack[historyStack.length - 1];
             if (lastHistory && lastHistory.type === 'menu') { lastHistory.scrollPos = menuListEl.scrollTop; lastHistory.selectedIndex = selectedIndex; }
 
-            if (selectedItem.target.toLowerCase().indexOf('.mnu') !== -1) { loadMnu(selectedItem.target, selectedItem.title); }
-            else if (selectedItem.target.toLowerCase().indexOf('.txt') !== -1) { loadTxt(selectedItem.target, selectedItem.title); }
-            else if (selectedItem.target === '[EXIT]') { exitApp(); }
+            if (selectedItem.target === '[LANGUAGE_SELECT]') {
+                showLanguageSelection();
+            } else if (selectedItem.target.toLowerCase().indexOf('.mnu') !== -1) {
+                loadMnu(selectedItem.target, selectedItem.title);
+            } else if (selectedItem.target.toLowerCase().indexOf('.txt') !== -1) {
+                loadTxt(selectedItem.target, selectedItem.title);
+            } else if (selectedItem.target === '[EXIT]') {
+                exitApp();
+            }
 
-        } else if (currentView === 'content') { toggleAutoScroll(); }
-        else if (currentView === 'link-list' && currentTextLinks.length > 0 && selectedIndex < currentTextLinks.length) {
+        } else if (currentView === 'language-select') {
+            selectLanguage(selectedIndex);
+        } else if (currentView === 'content') {
+            toggleAutoScroll();
+        } else if (currentView === 'link-list' && currentTextLinks.length > 0 && selectedIndex < currentTextLinks.length) {
             var linkToOpen = currentTextLinks[selectedIndex].url;
             var openLinkConfirmed = true;
             if (appSettings.promptSound && appSettings.promptSound.toLowerCase() === 'yes') {
@@ -635,6 +913,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         stopAutoScroll();
         if (currentView === 'link-list') { hideLinkList(); return; }
+        if (currentView === 'language-select') {
+            loadMnu(INITIAL_MENU, APP_NAME);
+            return;
+        }
 
         if (historyStack.length > 1) {
             var C = historyStack.pop();
@@ -687,6 +969,9 @@ document.addEventListener('DOMContentLoaded', function () {
             softkeyCenterEl.textContent = currentMenuItems.length > 0 ? 'SELECT' : '';
             var isInitialMenuScreen = historyStack.length === 1 && historyStack[0].path === (BASE_SYS_PATH + INITIAL_MENU);
             softkeyRightEl.textContent = (historyStack.length <= 1 && isInitialMenuScreen) ? 'EXIT' : 'BACK';
+        } else if (currentView === 'language-select') {
+            softkeyCenterEl.textContent = 'SELECT';
+            softkeyRightEl.textContent = 'BACK';
         } else if (currentView === 'content') {
             softkeyLeftEl.textContent = currentTextLinks.length > 0 ? 'LINKS' : '';
             softkeyCenterEl.textContent = isAutoScrolling ? 'PAUSE' : 'SCROLL';
@@ -723,15 +1008,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function exitApp() {
-        getKaiAd({
-            publisher: publisherid,
-            app: appname,
-            slot: slotname,
-            onerror: err => console.error('Custom catch:', err),
-            onready: ad => {
-                ad.call('display');
-            }
-        });
+        if (typeof getKaiAd === 'function') {
+            getKaiAd({
+                publisher: typeof publisherid !== 'undefined' ? publisherid : '',
+                app: typeof appname !== 'undefined' ? appname : '',
+                slot: typeof slotname !== 'undefined' ? slotname : '',
+                onerror: function(err) { console.error('Custom catch:', err); },
+                onready: function(ad) { ad.call('display'); }
+            });
+        }
 
         var exitConfirmed = true;
         if (appSettings.promptSound && appSettings.promptSound.toLowerCase() === 'yes') {
@@ -749,13 +1034,14 @@ document.addEventListener('DOMContentLoaded', function () {
     softkeyRightEl.addEventListener('click', handleSoftRightKey);
 
     loadAndApplySettings(showVendorLogo);
-    getKaiAd({
-        publisher: publisherid,
-        app: appname,
-        slot: slotname,
-        onerror: err => console.error('Custom catch:', err),
-        onready: ad => {
-            ad.call('display');
-        }
-    });
+
+    if (typeof getKaiAd === 'function') {
+        getKaiAd({
+            publisher: typeof publisherid !== 'undefined' ? publisherid : '',
+            app: typeof appname !== 'undefined' ? appname : '',
+            slot: typeof slotname !== 'undefined' ? slotname : '',
+            onerror: function(err) { console.error('Custom catch:', err); },
+            onready: function(ad) { ad.call('display'); }
+        });
+    }
 });
